@@ -96,6 +96,20 @@ func TestBitlist_MaxValue(t *testing.T) {
 }
 
 func TestExtendUint(t *testing.T) {
+	t.Run("uint64 alias", func(t *testing.T) {
+		type aliasedUint64 = uint64
+
+		buf := []aliasedUint64{4}
+		got := ExtendUint(buf, 2)
+
+		if len(got) != 2 {
+			t.Fatalf("expected len 2, got %d", len(got))
+		}
+		if got[0] != 4 || got[1] != 0 {
+			t.Fatalf("unexpected result: %v", got)
+		}
+	})
+
 	t.Run("uint8", func(t *testing.T) {
 		buf := make([]uint8, 2, 4)
 		buf[0] = 1
