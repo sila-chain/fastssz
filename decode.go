@@ -179,16 +179,22 @@ func ExtendUint[T uints](b []T, needLen int) []T {
 }
 
 // ExtendUint64 extends a uint64 buffer to a given size.
+//
+// Deprecated: use ExtendUint instead.
 func ExtendUint64(b []uint64, needLen int) []uint64 {
 	return ExtendUint(b, needLen)
 }
 
 // ExtendUint16 extends a uint16 buffer to a given size.
+//
+// Deprecated: use ExtendUint instead.
 func ExtendUint16(b []uint16, needLen int) []uint16 {
 	return ExtendUint(b, needLen)
 }
 
 // ExtendUint8 extends a uint8 buffer to a given size.
+//
+// Deprecated: use ExtendUint instead.
 func ExtendUint8(b []uint8, needLen int) []uint8 {
 	return ExtendUint(b, needLen)
 }
