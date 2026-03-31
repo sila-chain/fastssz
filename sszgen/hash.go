@@ -42,6 +42,7 @@ func (v *Value) hashRoots(isList bool, elem Type) string {
 	}
 
 	var appendFn string
+	appendExpr := ""
 	var elemSize uint64
 	if elem == TypeBytes {
 		// [][]byte
@@ -56,8 +57,11 @@ func (v *Value) hashRoots(isList bool, elem Type) string {
 		}
 	} else {
 		// []uint64
-		appendFn = "Append" + uintVToName(v.e)
+		appendExpr = fmt.Sprintf("ssz.AppendUint(hh, %s)", subName)
 		elemSize = uint64(v.e.fixedSize())
+	}
+	if appendExpr == "" {
+		appendExpr = fmt.Sprintf("hh.%s(%s)", appendFn, subName)
 	}
 
 	var merkleize string
@@ -93,17 +97,16 @@ func (v *Value) hashRoots(isList bool, elem Type) string {
 	tmpl := `{
 		{{.outer}}subIndx := hh.Index()
 		for _, i := range ::.{{.name}} {
-			{{.inner}}hh.{{.appendFn}}({{.subName}})
+			{{.inner}}{{.appendExpr}}
 		}
 		{{.merkleize}}
 	}`
 	return execTmpl(tmpl, map[string]interface{}{
-		"outer":     v.validate(),
-		"inner":     inner,
-		"name":      v.name,
-		"subName":   subName,
-		"appendFn":  appendFn,
-		"merkleize": merkleize,
+		"outer":      v.validate(),
+		"inner":      inner,
+		"name":       v.name,
+		"appendExpr": appendExpr,
+		"merkleize":  merkleize,
 	})
 }
 
@@ -161,8 +164,7 @@ func (v *Value) hashTreeRoot(name string, appendBytes bool) string {
 
 	case TypeUint:
 		if v.ref != "" || v.obj != "" {
-			// alias to Uint64
-			name = fmt.Sprintf("uint64(%s)", name)
+			name = fmt.Sprintf("%s(%s)", strings.ToLower(uintVToName(v)), name)
 		}
 		bitLen := v.fixedSize() * 8
 		return fmt.Sprintf("hh.PutUint%d(%s)", bitLen, name)

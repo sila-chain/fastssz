@@ -5,6 +5,8 @@ import (
 	"testing"
 )
 
+type validatorIndex uint64
+
 func TestNextPowerOfTwo(t *testing.T) {
 	cases := []struct {
 		Num, Res uint64
@@ -34,5 +36,15 @@ func TestMerkleize8ByteVector(t *testing.T) {
 	result := merkleizeInput([]byte{'1', '2', '3', '4', '5', '6', '7', '8'}, 0)
 	if !bytes.Equal(result, []byte{49, 50, 51, 52, 53, 54, 55, 56, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}) {
 		t.Fatalf("Unexpected result: %v", result)
+	}
+}
+
+func TestAppendUintAcceptsNamedUint64(t *testing.T) {
+	var h Hasher
+	AppendUint(&h, validatorIndex(7))
+
+	want := MarshalUint64(nil, 7)
+	if !bytes.Equal(h.buf, want) {
+		t.Fatalf("unexpected result: %v", h.buf)
 	}
 }
