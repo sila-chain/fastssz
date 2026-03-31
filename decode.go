@@ -165,31 +165,32 @@ func DivideInt(a, b int) (int, bool) {
 	return a / b, a%b == 0
 }
 
-// ExtendUint64 extends a uint64 buffer to a given size
+type uints interface {
+	~uint8 | ~uint16 | ~uint64
+}
+
+// ExtendUint extends an unsigned integer buffer to a given size.
+func ExtendUint[T uints](b []T, needLen int) []T {
+	b = b[:cap(b)]
+	if n := needLen - cap(b); n > 0 {
+		b = append(b, make([]T, n)...)
+	}
+	return b[:needLen]
+}
+
+// ExtendUint64 extends a uint64 buffer to a given size.
 func ExtendUint64(b []uint64, needLen int) []uint64 {
-	b = b[:cap(b)]
-	if n := needLen - cap(b); n > 0 {
-		b = append(b, make([]uint64, n)...)
-	}
-	return b[:needLen]
+	return ExtendUint(b, needLen)
 }
 
-// ExtendUint16 extends a uint16 buffer to a given size
+// ExtendUint16 extends a uint16 buffer to a given size.
 func ExtendUint16(b []uint16, needLen int) []uint16 {
-	b = b[:cap(b)]
-	if n := needLen - cap(b); n > 0 {
-		b = append(b, make([]uint16, n)...)
-	}
-	return b[:needLen]
+	return ExtendUint(b, needLen)
 }
 
-// ExtendUint8 extends a uint16 buffer to a given size
+// ExtendUint8 extends a uint8 buffer to a given size.
 func ExtendUint8(b []uint8, needLen int) []uint8 {
-	b = b[:cap(b)]
-	if n := needLen - cap(b); n > 0 {
-		b = append(b, make([]uint8, n)...)
-	}
-	return b[:needLen]
+	return ExtendUint(b, needLen)
 }
 
 // ReadOffset reads an offset from buf

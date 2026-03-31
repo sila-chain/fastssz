@@ -797,7 +797,7 @@ func (i *IndexedAttestation) UnmarshalSSZ(buf []byte) error {
 		if err != nil {
 			return err
 		}
-		i.AttestationIndices = ssz.ExtendUint64(i.AttestationIndices, num)
+		i.AttestationIndices = ssz.ExtendUint(i.AttestationIndices, num)
 		for ii := 0; ii < num; ii++ {
 			i.AttestationIndices[ii] = ssz.UnmarshallUint64(buf[ii*8 : (ii+1)*8])
 		}
@@ -2235,7 +2235,7 @@ func (b *BeaconState) UnmarshalSSZ(buf []byte) error {
 	}
 
 	// Field (14) 'Slashings'
-	b.Slashings = ssz.ExtendUint64(b.Slashings, 64)
+	b.Slashings = ssz.ExtendUint(b.Slashings, 64)
 	for ii := 0; ii < 64; ii++ {
 		b.Slashings[ii] = ssz.UnmarshallUint64(buf[6416:6928][ii*8 : (ii+1)*8])
 	}
@@ -2357,7 +2357,7 @@ func (b *BeaconState) UnmarshalSSZ(buf []byte) error {
 		if err != nil {
 			return err
 		}
-		b.Balances = ssz.ExtendUint64(b.Balances, num)
+		b.Balances = ssz.ExtendUint(b.Balances, num)
 		for ii := 0; ii < num; ii++ {
 			b.Balances[ii] = ssz.UnmarshallUint64(buf[ii*8 : (ii+1)*8])
 		}
@@ -2370,7 +2370,7 @@ func (b *BeaconState) UnmarshalSSZ(buf []byte) error {
 		if err != nil {
 			return err
 		}
-		b.PreviousEpochParticipation = ssz.ExtendUint8(b.PreviousEpochParticipation, num)
+		b.PreviousEpochParticipation = ssz.ExtendUint(b.PreviousEpochParticipation, num)
 		for ii := 0; ii < num; ii++ {
 			b.PreviousEpochParticipation[ii] = ssz.UnmarshallUint8(buf[ii*1 : (ii+1)*1])
 		}
@@ -2383,7 +2383,7 @@ func (b *BeaconState) UnmarshalSSZ(buf []byte) error {
 		if err != nil {
 			return err
 		}
-		b.CurrentEpochParticipation = ssz.ExtendUint8(b.CurrentEpochParticipation, num)
+		b.CurrentEpochParticipation = ssz.ExtendUint(b.CurrentEpochParticipation, num)
 		for ii := 0; ii < num; ii++ {
 			b.CurrentEpochParticipation[ii] = ssz.UnmarshallUint8(buf[ii*1 : (ii+1)*1])
 		}
@@ -2396,7 +2396,7 @@ func (b *BeaconState) UnmarshalSSZ(buf []byte) error {
 		if err != nil {
 			return err
 		}
-		b.InactivityScores = ssz.ExtendUint64(b.InactivityScores, num)
+		b.InactivityScores = ssz.ExtendUint(b.InactivityScores, num)
 		for ii := 0; ii < num; ii++ {
 			b.InactivityScores[ii] = ssz.UnmarshallUint64(buf[ii*8 : (ii+1)*8])
 		}

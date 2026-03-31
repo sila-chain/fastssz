@@ -94,3 +94,67 @@ func TestBitlist_MaxValue(t *testing.T) {
 		})
 	}
 }
+
+func TestExtendUint(t *testing.T) {
+	t.Run("uint8", func(t *testing.T) {
+		buf := make([]uint8, 2, 4)
+		buf[0] = 1
+		buf[1] = 2
+
+		base := &buf[:cap(buf)][0]
+		got := ExtendUint(buf, 4)
+
+		if len(got) != 4 {
+			t.Fatalf("expected len 4, got %d", len(got))
+		}
+		if cap(got) != 4 {
+			t.Fatalf("expected cap 4, got %d", cap(got))
+		}
+		if &got[0] != base {
+			t.Fatal("expected ExtendUint to reuse backing array")
+		}
+		if got[0] != 1 || got[1] != 2 || got[2] != 0 || got[3] != 0 {
+			t.Fatalf("unexpected result: %v", got)
+		}
+	})
+
+	t.Run("uint16", func(t *testing.T) {
+		buf := []uint16{3}
+
+		got := ExtendUint(buf, 3)
+
+		if len(got) != 3 {
+			t.Fatalf("expected len 3, got %d", len(got))
+		}
+		if got[0] != 3 || got[1] != 0 || got[2] != 0 {
+			t.Fatalf("unexpected result: %v", got)
+		}
+	})
+
+	t.Run("uint64", func(t *testing.T) {
+		buf := make([]uint64, 1)
+		buf[0] = 9
+
+		got := ExtendUint(buf, 2)
+
+		if len(got) != 2 {
+			t.Fatalf("expected len 2, got %d", len(got))
+		}
+		if got[0] != 9 || got[1] != 0 {
+			t.Fatalf("unexpected result: %v", got)
+		}
+	})
+
+	t.Run("shrink", func(t *testing.T) {
+		buf := []uint16{5, 6, 7}
+
+		got := ExtendUint(buf, 2)
+
+		if len(got) != 2 {
+			t.Fatalf("expected len 2, got %d", len(got))
+		}
+		if got[0] != 5 || got[1] != 6 {
+			t.Fatalf("unexpected result: %v", got)
+		}
+	})
+}
