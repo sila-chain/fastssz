@@ -254,28 +254,39 @@ func (n *Node) ProveMulti(indices []int) (*Multiproof, error) {
 	return proof, nil
 }
 
+// LeafFromUint returns a leaf node from a uint8, uint16, uint32, or uint64 value.
+func LeafFromUint[T marshalUints](i T) *Node {
+	buf := make([]byte, 32)
+	copy(buf, MarshalUint(nil, i))
+	return NewNodeWithValue(buf)
+}
+
+// LeafFromUint64 returns a leaf node from a uint64 value.
+//
+// Deprecated: use LeafFromUint instead.
 func LeafFromUint64(i uint64) *Node {
-	buf := make([]byte, 32)
-	binary.LittleEndian.PutUint64(buf[:8], i)
-	return NewNodeWithValue(buf)
+	return LeafFromUint(i)
 }
 
+// LeafFromUint32 returns a leaf node from a uint32 value.
+//
+// Deprecated: use LeafFromUint instead.
 func LeafFromUint32(i uint32) *Node {
-	buf := make([]byte, 32)
-	binary.LittleEndian.PutUint32(buf[:4], i)
-	return NewNodeWithValue(buf)
+	return LeafFromUint(i)
 }
 
+// LeafFromUint16 returns a leaf node from a uint16 value.
+//
+// Deprecated: use LeafFromUint instead.
 func LeafFromUint16(i uint16) *Node {
-	buf := make([]byte, 32)
-	binary.LittleEndian.PutUint16(buf[:2], i)
-	return NewNodeWithValue(buf)
+	return LeafFromUint(i)
 }
 
+// LeafFromUint8 returns a leaf node from a uint8 value.
+//
+// Deprecated: use LeafFromUint instead.
 func LeafFromUint8(i uint8) *Node {
-	buf := make([]byte, 32)
-	buf[0] = byte(i)
-	return NewNodeWithValue(buf)
+	return LeafFromUint(i)
 }
 
 func LeafFromBool(b bool) *Node {
