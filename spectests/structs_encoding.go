@@ -60,7 +60,7 @@ func (a *AggregateAndProof) UnmarshalSSZ(buf []byte) error {
 		return ssz.ErrOffset
 	}
 
-	if o1 < 108 {
+	if o1 != 108 {
 		return ssz.ErrInvalidVariableOffset
 	}
 
@@ -359,7 +359,7 @@ func (a *Attestation) UnmarshalSSZ(buf []byte) error {
 		return ssz.ErrOffset
 	}
 
-	if o0 < 228 {
+	if o0 != 228 {
 		return ssz.ErrInvalidVariableOffset
 	}
 
@@ -772,7 +772,7 @@ func (i *IndexedAttestation) UnmarshalSSZ(buf []byte) error {
 		return ssz.ErrOffset
 	}
 
-	if o0 < 228 {
+	if o0 != 228 {
 		return ssz.ErrInvalidVariableOffset
 	}
 
@@ -910,7 +910,7 @@ func (p *PendingAttestation) UnmarshalSSZ(buf []byte) error {
 		return ssz.ErrOffset
 	}
 
-	if o0 < 148 {
+	if o0 != 148 {
 		return ssz.ErrInvalidVariableOffset
 	}
 
@@ -1142,7 +1142,10 @@ func (v *Validator) UnmarshalSSZ(buf []byte) error {
 	v.EffectiveBalance = ssz.UnmarshallUint[uint64](buf[80:88])
 
 	// Field (3) 'Slashed'
-	v.Slashed = ssz.UnmarshalBool(buf[88:89])
+	v.Slashed, err = ssz.DecodeBool(buf[88:89])
+	if err != nil {
+		return err
+	}
 
 	// Field (4) 'ActivationEligibilityEpoch'
 	v.ActivationEligibilityEpoch = ssz.UnmarshallUint[uint64](buf[89:97])
@@ -1833,7 +1836,7 @@ func (a *AttesterSlashing) UnmarshalSSZ(buf []byte) error {
 		return ssz.ErrOffset
 	}
 
-	if o0 < 8 {
+	if o0 != 8 {
 		return ssz.ErrInvalidVariableOffset
 	}
 
@@ -2195,7 +2198,7 @@ func (b *BeaconState) UnmarshalSSZ(buf []byte) error {
 		return ssz.ErrOffset
 	}
 
-	if o7 < 10325 {
+	if o7 != 10325 {
 		return ssz.ErrInvalidVariableOffset
 	}
 
@@ -2750,7 +2753,7 @@ func (b *BeaconBlock) UnmarshalSSZ(buf []byte) error {
 		return ssz.ErrOffset
 	}
 
-	if o4 < 84 {
+	if o4 != 84 {
 		return ssz.ErrInvalidVariableOffset
 	}
 
@@ -2866,7 +2869,7 @@ func (s *SignedBeaconBlock) UnmarshalSSZ(buf []byte) error {
 		return ssz.ErrOffset
 	}
 
-	if o0 < 100 {
+	if o0 != 100 {
 		return ssz.ErrInvalidVariableOffset
 	}
 
@@ -3221,7 +3224,7 @@ func (b *BeaconBlockBody) UnmarshalSSZ(buf []byte) error {
 		return ssz.ErrOffset
 	}
 
-	if o3 < 444 {
+	if o3 != 444 {
 		return ssz.ErrInvalidVariableOffset
 	}
 
@@ -3735,7 +3738,7 @@ func (e *ErrorResponse) UnmarshalSSZ(buf []byte) error {
 		return ssz.ErrOffset
 	}
 
-	if o0 < 4 {
+	if o0 != 4 {
 		return ssz.ErrInvalidVariableOffset
 	}
 
@@ -4211,7 +4214,7 @@ func (s *SignedBeaconBlockMinimal) UnmarshalSSZ(buf []byte) error {
 		return ssz.ErrOffset
 	}
 
-	if o0 < 100 {
+	if o0 != 100 {
 		return ssz.ErrInvalidVariableOffset
 	}
 
@@ -4439,7 +4442,7 @@ func (b *BeaconBlockBodyMinimal) UnmarshalSSZ(buf []byte) error {
 		return ssz.ErrOffset
 	}
 
-	if o3 < 320 {
+	if o3 != 320 {
 		return ssz.ErrInvalidVariableOffset
 	}
 
@@ -4791,7 +4794,7 @@ func (b *BeaconBlockMinimal) UnmarshalSSZ(buf []byte) error {
 		return ssz.ErrOffset
 	}
 
-	if o4 < 84 {
+	if o4 != 84 {
 		return ssz.ErrInvalidVariableOffset
 	}
 
