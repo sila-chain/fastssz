@@ -52,14 +52,12 @@ func (v *Value) unmarshal(dst string) string {
 
 	case TypeUint:
 		if v.ref != "" {
-			// alias, we need to cast the value
-			return fmt.Sprintf("::.%s = %s.%s(ssz.Unmarshall%s(%s))", v.name, v.ref, v.obj, uintVToName(v), dst)
+			return fmt.Sprintf("::.%s = ssz.UnmarshallUint[%s.%s](%s)", v.name, v.ref, v.obj, dst)
 		}
 		if v.obj != "" {
-			// alias to a type on the same package
-			return fmt.Sprintf("::.%s = %s(ssz.Unmarshall%s(%s))", v.name, v.obj, uintVToName(v), dst)
+			return fmt.Sprintf("::.%s = ssz.UnmarshallUint[%s](%s)", v.name, v.obj, dst)
 		}
-		return fmt.Sprintf("::.%s = ssz.Unmarshall%s(%s)", v.name, uintVToName(v), dst)
+		return fmt.Sprintf("::.%s = ssz.UnmarshallUint[%s](%s)", v.name, strings.ToLower(uintVToName(v)), dst)
 
 	case TypeBitList:
 		tmpl := `if err = ssz.ValidateBitlist({{.dst}}, {{.size}}); err != nil {
