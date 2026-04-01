@@ -5,28 +5,58 @@ import (
 	"errors"
 	"fmt"
 	"math/bits"
+	"unsafe"
 )
 
 const bytesPerLengthOffset = 4
 
-// UnmarshallUint64 unmarshals a little endian uint64 from the src input
+type unmarshallUints interface {
+	~uint8 | ~uint16 | ~uint32 | ~uint64
+}
+
+// UnmarshallUint unmarshals a little endian uint8, uint16, uint32, or uint64 from the src input.
+func UnmarshallUint[T unmarshallUints](src []byte) T {
+	var zero T
+	switch unsafe.Sizeof(zero) {
+	case 1:
+		return T(src[0])
+	case 2:
+		return T(binary.LittleEndian.Uint16(src[:2]))
+	case 4:
+		return T(binary.LittleEndian.Uint32(src[:4]))
+	case 8:
+		return T(binary.LittleEndian.Uint64(src[:8]))
+	default:
+		panic("unsupported uint size")
+	}
+}
+
+// UnmarshallUint64 unmarshals a little endian uint64 from the src input.
+//
+// Deprecated: use UnmarshallUint instead.
 func UnmarshallUint64(src []byte) uint64 {
-	return binary.LittleEndian.Uint64(src)
+	return UnmarshallUint[uint64](src)
 }
 
-// UnmarshallUint32 unmarshals a little endian uint32 from the src input
+// UnmarshallUint32 unmarshals a little endian uint32 from the src input.
+//
+// Deprecated: use UnmarshallUint instead.
 func UnmarshallUint32(src []byte) uint32 {
-	return binary.LittleEndian.Uint32(src[:4])
+	return UnmarshallUint[uint32](src)
 }
 
-// UnmarshallUint16 unmarshals a little endian uint16 from the src input
+// UnmarshallUint16 unmarshals a little endian uint16 from the src input.
+//
+// Deprecated: use UnmarshallUint instead.
 func UnmarshallUint16(src []byte) uint16 {
-	return binary.LittleEndian.Uint16(src[:2])
+	return UnmarshallUint[uint16](src)
 }
 
-// UnmarshallUint8 unmarshals a little endian uint8 from the src input
+// UnmarshallUint8 unmarshals a little endian uint8 from the src input.
+//
+// Deprecated: use UnmarshallUint instead.
 func UnmarshallUint8(src []byte) uint8 {
-	return uint8(src[0])
+	return UnmarshallUint[uint8](src)
 }
 
 // UnmarshalBool unmarshals a boolean from the src input

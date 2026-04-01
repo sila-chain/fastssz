@@ -1,6 +1,9 @@
 package ssz
 
 import (
+	"go/ast"
+	"go/parser"
+	"go/token"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -8,6 +11,8 @@ import (
 	"strings"
 	"testing"
 )
+
+type aliasedUint64 uint64
 
 func TestBitlist(t *testing.T) {
 	res := []string{}
@@ -171,4 +176,52 @@ func TestExtendUint(t *testing.T) {
 			t.Fatalf("unexpected result: %v", got)
 		}
 	})
+}
+
+func TestUnmarshallUintAcceptsNamedUint64(t *testing.T) {
+	got := UnmarshallUint[aliasedUint64]([]byte{9, 0, 0, 0, 0, 0, 0, 0})
+	if got != 9 {
+		t.Fatalf("unexpected result: %v", got)
+	}
+}
+
+func TestDeprecatedUnmarshallWrappersCallUnmarshallUint(t *testing.T) {
+	fset := token.NewFileSet()
+	file, err := parser.ParseFile(fset, "decode.go", nil, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, name := range []string{"UnmarshallUint64", "UnmarshallUint32", "UnmarshallUint16", "UnmarshallUint8"} {
+		found := false
+		for _, decl := range file.Decls {
+			fn, ok := decl.(*ast.FuncDecl)
+			if !ok || fn.Name.Name != name {
+				continue
+			}
+			found = true
+			if len(fn.Body.List) != 1 {
+				t.Fatalf("expected %s to have exactly one statement", name)
+			}
+			ret, ok := fn.Body.List[0].(*ast.ReturnStmt)
+			if !ok || len(ret.Results) != 1 {
+				t.Fatalf("expected %s to return a direct call", name)
+			}
+			call, ok := ret.Results[0].(*ast.CallExpr)
+			if !ok {
+				t.Fatalf("expected %s to return a call", name)
+			}
+			ident, ok := call.Fun.(*ast.IndexExpr)
+			if !ok {
+				t.Fatalf("expected %s to call generic UnmarshallUint", name)
+			}
+			fun, ok := ident.X.(*ast.Ident)
+			if !ok || fun.Name != "UnmarshallUint" {
+				t.Fatalf("expected %s to call UnmarshallUint", name)
+			}
+		}
+		if !found {
+			t.Fatalf("did not find %s", name)
+		}
+	}
 }
