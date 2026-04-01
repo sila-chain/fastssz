@@ -105,7 +105,7 @@ func (a *AggregateAndProof) HashTreeRootWith(hh *ssz.Hasher) (err error) {
 	indx := hh.Index()
 
 	// Field (0) 'Index'
-	hh.PutUint64(a.Index)
+	ssz.PutUint(hh, a.Index)
 
 	// Field (1) 'Aggregate'
 	if err = a.Aggregate.HashTreeRootWith(hh); err != nil {
@@ -179,7 +179,7 @@ func (c *Checkpoint) HashTreeRootWith(hh *ssz.Hasher) (err error) {
 	indx := hh.Index()
 
 	// Field (0) 'Epoch'
-	hh.PutUint64(uint64(c.Epoch))
+	ssz.PutUint(hh, c.Epoch)
 
 	// Field (1) 'Root'
 	if size := len(c.Root); size != 32 {
@@ -281,10 +281,10 @@ func (a *AttestationData) HashTreeRootWith(hh *ssz.Hasher) (err error) {
 	indx := hh.Index()
 
 	// Field (0) 'Slot'
-	hh.PutUint64(uint64(a.Slot))
+	ssz.PutUint(hh, a.Slot)
 
 	// Field (1) 'Index'
-	hh.PutUint64(a.Index)
+	ssz.PutUint(hh, a.Index)
 
 	// Field (2) 'BeaconBlockHash'
 	hh.PutBytes(a.BeaconBlockHash[:])
@@ -509,7 +509,7 @@ func (d *DepositData) HashTreeRootWith(hh *ssz.Hasher) (err error) {
 	hh.PutBytes(d.WithdrawalCredentials[:])
 
 	// Field (2) 'Amount'
-	hh.PutUint64(d.Amount)
+	ssz.PutUint(hh, d.Amount)
 
 	// Field (3) 'Signature'
 	if size := len(d.Signature); size != 96 {
@@ -709,7 +709,7 @@ func (d *DepositMessage) HashTreeRootWith(hh *ssz.Hasher) (err error) {
 	hh.PutBytes(d.WithdrawalCredentials)
 
 	// Field (2) 'Amount'
-	hh.PutUint64(d.Amount)
+	ssz.PutUint(hh, d.Amount)
 
 	hh.Merkleize(indx)
 	return
@@ -974,10 +974,10 @@ func (p *PendingAttestation) HashTreeRootWith(hh *ssz.Hasher) (err error) {
 	}
 
 	// Field (2) 'InclusionDelay'
-	hh.PutUint64(p.InclusionDelay)
+	ssz.PutUint(hh, p.InclusionDelay)
 
 	// Field (3) 'ProposerIndex'
-	hh.PutUint64(p.ProposerIndex)
+	ssz.PutUint(hh, p.ProposerIndex)
 
 	hh.Merkleize(indx)
 	return
@@ -1068,7 +1068,7 @@ func (f *Fork) HashTreeRootWith(hh *ssz.Hasher) (err error) {
 	hh.PutBytes(f.CurrentVersion)
 
 	// Field (2) 'Epoch'
-	hh.PutUint64(f.Epoch)
+	ssz.PutUint(hh, f.Epoch)
 
 	hh.Merkleize(indx)
 	return
@@ -1189,22 +1189,22 @@ func (v *Validator) HashTreeRootWith(hh *ssz.Hasher) (err error) {
 	hh.PutBytes(v.WithdrawalCredentials)
 
 	// Field (2) 'EffectiveBalance'
-	hh.PutUint64(v.EffectiveBalance)
+	ssz.PutUint(hh, v.EffectiveBalance)
 
 	// Field (3) 'Slashed'
 	hh.PutBool(v.Slashed)
 
 	// Field (4) 'ActivationEligibilityEpoch'
-	hh.PutUint64(v.ActivationEligibilityEpoch)
+	ssz.PutUint(hh, v.ActivationEligibilityEpoch)
 
 	// Field (5) 'ActivationEpoch'
-	hh.PutUint64(v.ActivationEpoch)
+	ssz.PutUint(hh, v.ActivationEpoch)
 
 	// Field (6) 'ExitEpoch'
-	hh.PutUint64(v.ExitEpoch)
+	ssz.PutUint(hh, v.ExitEpoch)
 
 	// Field (7) 'WithdrawableEpoch'
-	hh.PutUint64(v.WithdrawableEpoch)
+	ssz.PutUint(hh, v.WithdrawableEpoch)
 
 	hh.Merkleize(indx)
 	return
@@ -1261,10 +1261,10 @@ func (v *VoluntaryExit) HashTreeRootWith(hh *ssz.Hasher) (err error) {
 	indx := hh.Index()
 
 	// Field (0) 'Epoch'
-	hh.PutUint64(v.Epoch)
+	ssz.PutUint(hh, v.Epoch)
 
 	// Field (1) 'ValidatorIndex'
-	hh.PutUint64(v.ValidatorIndex)
+	ssz.PutUint(hh, v.ValidatorIndex)
 
 	hh.Merkleize(indx)
 	return
@@ -1406,7 +1406,7 @@ func (e *Eth1Block) HashTreeRootWith(hh *ssz.Hasher) (err error) {
 	indx := hh.Index()
 
 	// Field (0) 'Timestamp'
-	hh.PutUint64(e.Timestamp)
+	ssz.PutUint(hh, e.Timestamp)
 
 	// Field (1) 'DepositRoot'
 	if size := len(e.DepositRoot); size != 32 {
@@ -1416,7 +1416,7 @@ func (e *Eth1Block) HashTreeRootWith(hh *ssz.Hasher) (err error) {
 	hh.PutBytes(e.DepositRoot)
 
 	// Field (2) 'DepositCount'
-	hh.PutUint64(e.DepositCount)
+	ssz.PutUint(hh, e.DepositCount)
 
 	hh.Merkleize(indx)
 	return
@@ -1500,7 +1500,7 @@ func (e *Eth1Data) HashTreeRootWith(hh *ssz.Hasher) (err error) {
 	hh.PutBytes(e.DepositRoot)
 
 	// Field (1) 'DepositCount'
-	hh.PutUint64(e.DepositCount)
+	ssz.PutUint(hh, e.DepositCount)
 
 	// Field (2) 'BlockHash'
 	if size := len(e.BlockHash); size != 32 {
@@ -2442,7 +2442,7 @@ func (b *BeaconState) HashTreeRootWith(hh *ssz.Hasher) (err error) {
 	indx := hh.Index()
 
 	// Field (0) 'GenesisTime'
-	hh.PutUint64(b.GenesisTime)
+	ssz.PutUint(hh, b.GenesisTime)
 
 	// Field (1) 'GenesisValidatorsRoot'
 	if size := len(b.GenesisValidatorsRoot); size != 32 {
@@ -2452,7 +2452,7 @@ func (b *BeaconState) HashTreeRootWith(hh *ssz.Hasher) (err error) {
 	hh.PutBytes(b.GenesisValidatorsRoot)
 
 	// Field (2) 'Slot'
-	hh.PutUint64(b.Slot)
+	ssz.PutUint(hh, b.Slot)
 
 	// Field (3) 'Fork'
 	if err = b.Fork.HashTreeRootWith(hh); err != nil {
@@ -2523,7 +2523,7 @@ func (b *BeaconState) HashTreeRootWith(hh *ssz.Hasher) (err error) {
 	}
 
 	// Field (10) 'Eth1DepositIndex'
-	hh.PutUint64(b.Eth1DepositIndex)
+	ssz.PutUint(hh, b.Eth1DepositIndex)
 
 	// Field (11) 'Validators'
 	{
@@ -2790,10 +2790,10 @@ func (b *BeaconBlock) HashTreeRootWith(hh *ssz.Hasher) (err error) {
 	indx := hh.Index()
 
 	// Field (0) 'Slot'
-	hh.PutUint64(b.Slot)
+	ssz.PutUint(hh, b.Slot)
 
 	// Field (1) 'ProposerIndex'
-	hh.PutUint64(b.ProposerIndex)
+	ssz.PutUint(hh, b.ProposerIndex)
 
 	// Field (2) 'ParentRoot'
 	if size := len(b.ParentRoot); size != 32 {
@@ -3022,19 +3022,19 @@ func (t *Transfer) HashTreeRootWith(hh *ssz.Hasher) (err error) {
 	indx := hh.Index()
 
 	// Field (0) 'Sender'
-	hh.PutUint64(t.Sender)
+	ssz.PutUint(hh, t.Sender)
 
 	// Field (1) 'Recipient'
-	hh.PutUint64(t.Recipient)
+	ssz.PutUint(hh, t.Recipient)
 
 	// Field (2) 'Amount'
-	hh.PutUint64(t.Amount)
+	ssz.PutUint(hh, t.Amount)
 
 	// Field (3) 'Fee'
-	hh.PutUint64(t.Fee)
+	ssz.PutUint(hh, t.Fee)
 
 	// Field (4) 'Slot'
-	hh.PutUint64(t.Slot)
+	ssz.PutUint(hh, t.Slot)
 
 	// Field (5) 'Pubkey'
 	if size := len(t.Pubkey); size != 48 {
@@ -3667,10 +3667,10 @@ func (b *BeaconBlockHeader) HashTreeRootWith(hh *ssz.Hasher) (err error) {
 	indx := hh.Index()
 
 	// Field (0) 'Slot'
-	hh.PutUint64(b.Slot)
+	ssz.PutUint(hh, b.Slot)
 
 	// Field (1) 'ProposerIndex'
-	hh.PutUint64(b.ProposerIndex)
+	ssz.PutUint(hh, b.ProposerIndex)
 
 	// Field (2) 'ParentRoot'
 	if size := len(b.ParentRoot); size != 32 {
@@ -4831,10 +4831,10 @@ func (b *BeaconBlockMinimal) HashTreeRootWith(hh *ssz.Hasher) (err error) {
 	indx := hh.Index()
 
 	// Field (0) 'Slot'
-	hh.PutUint64(b.Slot)
+	ssz.PutUint(hh, b.Slot)
 
 	// Field (1) 'ProposerIndex'
-	hh.PutUint64(b.ProposerIndex)
+	ssz.PutUint(hh, b.ProposerIndex)
 
 	// Field (2) 'ParentRoot'
 	if size := len(b.ParentRoot); size != 32 {

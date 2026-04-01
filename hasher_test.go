@@ -52,6 +52,17 @@ func TestAppendUintAcceptsNamedUint64(t *testing.T) {
 	}
 }
 
+func TestPutUintAcceptsNamedUint64(t *testing.T) {
+	var h Hasher
+	PutUint(&h, validatorIndex(7))
+
+	want := make([]byte, 32)
+	copy(want, MarshalUint64(nil, 7))
+	if !bytes.Equal(h.buf, want) {
+		t.Fatalf("unexpected result: %v", h.buf)
+	}
+}
+
 func TestDeprecatedAppendWrappersCallAppendUint(t *testing.T) {
 	fset := token.NewFileSet()
 	file, err := parser.ParseFile(fset, "hasher.go", nil, 0)
@@ -81,6 +92,43 @@ func TestDeprecatedAppendWrappersCallAppendUint(t *testing.T) {
 			ident, ok := call.Fun.(*ast.Ident)
 			if !ok || ident.Name != "AppendUint" {
 				t.Fatalf("expected %s to call AppendUint", name)
+			}
+		}
+		if !found {
+			t.Fatalf("did not find %s", name)
+		}
+	}
+}
+
+func TestDeprecatedPutWrappersCallPutUint(t *testing.T) {
+	fset := token.NewFileSet()
+	file, err := parser.ParseFile(fset, "hasher.go", nil, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, name := range []string{"PutUint64", "PutUint32", "PutUint16", "PutUint8"} {
+		found := false
+		for _, decl := range file.Decls {
+			fn, ok := decl.(*ast.FuncDecl)
+			if !ok || fn.Name.Name != name {
+				continue
+			}
+			found = true
+			if len(fn.Body.List) != 1 {
+				t.Fatalf("expected %s to have exactly one statement", name)
+			}
+			exprStmt, ok := fn.Body.List[0].(*ast.ExprStmt)
+			if !ok {
+				t.Fatalf("expected %s to delegate with a direct call", name)
+			}
+			call, ok := exprStmt.X.(*ast.CallExpr)
+			if !ok {
+				t.Fatalf("expected %s body to be a call", name)
+			}
+			ident, ok := call.Fun.(*ast.Ident)
+			if !ok || ident.Name != "PutUint" {
+				t.Fatalf("expected %s to call PutUint", name)
 			}
 		}
 		if !found {

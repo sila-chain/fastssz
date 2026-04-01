@@ -163,11 +163,7 @@ func (v *Value) hashTreeRoot(name string, appendBytes bool) string {
 		}
 
 	case TypeUint:
-		if v.ref != "" || v.obj != "" {
-			name = fmt.Sprintf("%s(%s)", strings.ToLower(uintVToName(v)), name)
-		}
-		bitLen := v.fixedSize() * 8
-		return fmt.Sprintf("hh.PutUint%d(%s)", bitLen, name)
+		return fmt.Sprintf("ssz.PutUint(hh, %s)", name)
 
 	case TypeBitList:
 		tmpl := `if len({{.name}}) == 0 {

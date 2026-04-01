@@ -67,7 +67,7 @@ func (m *Metadata) HashTreeRootWith(hh *ssz.Hasher) (err error) {
 	indx := hh.Index()
 
 	// Field (0) 'Version'
-	hh.PutUint8(m.Version)
+	ssz.PutUint(hh, m.Version)
 
 	// Field (1) 'CodeHash'
 	if size := len(m.CodeHash); size != 32 {
@@ -77,7 +77,7 @@ func (m *Metadata) HashTreeRootWith(hh *ssz.Hasher) (err error) {
 	hh.PutBytes(m.CodeHash)
 
 	// Field (2) 'CodeLength'
-	hh.PutUint16(m.CodeLength)
+	ssz.PutUint(hh, m.CodeLength)
 
 	hh.Merkleize(indx)
 	return
@@ -174,7 +174,7 @@ func (c *Chunk) HashTreeRootWith(hh *ssz.Hasher) (err error) {
 	indx := hh.Index()
 
 	// Field (0) 'FIO'
-	hh.PutUint8(c.FIO)
+	ssz.PutUint(hh, c.FIO)
 
 	// Field (1) 'Code'
 	if size := len(c.Code); size != 32 {
