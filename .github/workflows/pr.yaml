@@ -5,11 +5,11 @@ jobs:
     runs-on: ubuntu-latest
     name: Go test
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Setup go
-        uses: actions/setup-go@v1
+        uses: actions/setup-go@v5
         with:
-          go-version: '1.15.10'
+          go-version-file: go.mod
       - name: Validate spec
         run: ./scripts/ci-validate-specs.sh
       - name: Download spec tests
