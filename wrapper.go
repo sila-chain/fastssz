@@ -14,20 +14,37 @@ func (w *Wrapper) AddBytes(b []byte) {
 	w.AddNode(LeafFromBytes(b))
 }
 
+// AddUint adds a uint8, uint16, uint32, or uint64 leaf node.
+func AddUint[T marshalUints](w *Wrapper, i T) {
+	w.AddNode(LeafFromUint(i))
+}
+
+// AddUint64 adds a uint64 leaf node.
+//
+// Deprecated: use AddUint instead.
 func (w *Wrapper) AddUint64(i uint64) {
-	w.AddNode(LeafFromUint64(i))
+	AddUint(w, i)
 }
 
+// AddUint32 adds a uint32 leaf node.
+//
+// Deprecated: use AddUint instead.
 func (w *Wrapper) AddUint32(i uint32) {
-	w.AddNode(LeafFromUint32(i))
+	AddUint(w, i)
 }
 
+// AddUint16 adds a uint16 leaf node.
+//
+// Deprecated: use AddUint instead.
 func (w *Wrapper) AddUint16(i uint16) {
-	w.AddNode(LeafFromUint16(i))
+	AddUint(w, i)
 }
 
+// AddUint8 adds a uint8 leaf node.
+//
+// Deprecated: use AddUint instead.
 func (w *Wrapper) AddUint8(i uint8) {
-	w.AddNode(LeafFromUint8(i))
+	AddUint(w, i)
 }
 
 func (w *Wrapper) AddNode(n *Node) {
