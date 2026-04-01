@@ -53,14 +53,7 @@ func (v *Value) marshal() string {
 		})
 
 	case TypeUint:
-		var name string
-		if v.ref != "" || v.obj != "" {
-			// alias to Uint64
-			name = fmt.Sprintf("uint64(::.%s)", v.name)
-		} else {
-			name = "::." + v.name
-		}
-		return fmt.Sprintf("dst = ssz.Marshal%s(dst, %s)", uintVToName(v), name)
+		return fmt.Sprintf("dst = ssz.MarshalUint(dst, ::.%s)", v.name)
 
 	case TypeBitList:
 		return fmt.Sprintf("%sdst = append(dst, ::.%s...)", v.validate(), v.name)

@@ -19,7 +19,7 @@ func (a *AggregateAndProof) MarshalSSZTo(buf []byte) (dst []byte, err error) {
 	offset := int(108)
 
 	// Field (0) 'Index'
-	dst = ssz.MarshalUint64(dst, a.Index)
+	dst = ssz.MarshalUint(dst, a.Index)
 
 	// Offset (1) 'Aggregate'
 	dst = ssz.WriteOffset(dst, offset)
@@ -131,7 +131,7 @@ func (c *Checkpoint) MarshalSSZTo(buf []byte) (dst []byte, err error) {
 	dst = buf
 
 	// Field (0) 'Epoch'
-	dst = ssz.MarshalUint64(dst, uint64(c.Epoch))
+	dst = ssz.MarshalUint(dst, c.Epoch)
 
 	// Field (1) 'Root'
 	if size := len(c.Root); size != 32 {
@@ -202,10 +202,10 @@ func (a *AttestationData) MarshalSSZTo(buf []byte) (dst []byte, err error) {
 	dst = buf
 
 	// Field (0) 'Slot'
-	dst = ssz.MarshalUint64(dst, uint64(a.Slot))
+	dst = ssz.MarshalUint(dst, a.Slot)
 
 	// Field (1) 'Index'
-	dst = ssz.MarshalUint64(dst, a.Index)
+	dst = ssz.MarshalUint(dst, a.Index)
 
 	// Field (2) 'BeaconBlockHash'
 	dst = append(dst, a.BeaconBlockHash[:]...)
@@ -449,7 +449,7 @@ func (d *DepositData) MarshalSSZTo(buf []byte) (dst []byte, err error) {
 	dst = append(dst, d.WithdrawalCredentials[:]...)
 
 	// Field (2) 'Amount'
-	dst = ssz.MarshalUint64(dst, d.Amount)
+	dst = ssz.MarshalUint(dst, d.Amount)
 
 	// Field (3) 'Signature'
 	if size := len(d.Signature); size != 96 {
@@ -648,7 +648,7 @@ func (d *DepositMessage) MarshalSSZTo(buf []byte) (dst []byte, err error) {
 	dst = append(dst, d.WithdrawalCredentials...)
 
 	// Field (2) 'Amount'
-	dst = ssz.MarshalUint64(dst, d.Amount)
+	dst = ssz.MarshalUint(dst, d.Amount)
 
 	return
 }
@@ -750,7 +750,7 @@ func (i *IndexedAttestation) MarshalSSZTo(buf []byte) (dst []byte, err error) {
 		return
 	}
 	for ii := 0; ii < len(i.AttestationIndices); ii++ {
-		dst = ssz.MarshalUint64(dst, i.AttestationIndices[ii])
+		dst = ssz.MarshalUint(dst, i.AttestationIndices[ii])
 	}
 
 	return
@@ -879,10 +879,10 @@ func (p *PendingAttestation) MarshalSSZTo(buf []byte) (dst []byte, err error) {
 	}
 
 	// Field (2) 'InclusionDelay'
-	dst = ssz.MarshalUint64(dst, p.InclusionDelay)
+	dst = ssz.MarshalUint(dst, p.InclusionDelay)
 
 	// Field (3) 'ProposerIndex'
-	dst = ssz.MarshalUint64(dst, p.ProposerIndex)
+	dst = ssz.MarshalUint(dst, p.ProposerIndex)
 
 	// Field (0) 'AggregationBits'
 	if size := len(p.AggregationBits); size > 2048 {
@@ -1007,7 +1007,7 @@ func (f *Fork) MarshalSSZTo(buf []byte) (dst []byte, err error) {
 	dst = append(dst, f.CurrentVersion...)
 
 	// Field (2) 'Epoch'
-	dst = ssz.MarshalUint64(dst, f.Epoch)
+	dst = ssz.MarshalUint(dst, f.Epoch)
 
 	return
 }
@@ -1098,22 +1098,22 @@ func (v *Validator) MarshalSSZTo(buf []byte) (dst []byte, err error) {
 	dst = append(dst, v.WithdrawalCredentials...)
 
 	// Field (2) 'EffectiveBalance'
-	dst = ssz.MarshalUint64(dst, v.EffectiveBalance)
+	dst = ssz.MarshalUint(dst, v.EffectiveBalance)
 
 	// Field (3) 'Slashed'
 	dst = ssz.MarshalBool(dst, v.Slashed)
 
 	// Field (4) 'ActivationEligibilityEpoch'
-	dst = ssz.MarshalUint64(dst, v.ActivationEligibilityEpoch)
+	dst = ssz.MarshalUint(dst, v.ActivationEligibilityEpoch)
 
 	// Field (5) 'ActivationEpoch'
-	dst = ssz.MarshalUint64(dst, v.ActivationEpoch)
+	dst = ssz.MarshalUint(dst, v.ActivationEpoch)
 
 	// Field (6) 'ExitEpoch'
-	dst = ssz.MarshalUint64(dst, v.ExitEpoch)
+	dst = ssz.MarshalUint(dst, v.ExitEpoch)
 
 	// Field (7) 'WithdrawableEpoch'
-	dst = ssz.MarshalUint64(dst, v.WithdrawableEpoch)
+	dst = ssz.MarshalUint(dst, v.WithdrawableEpoch)
 
 	return
 }
@@ -1220,10 +1220,10 @@ func (v *VoluntaryExit) MarshalSSZTo(buf []byte) (dst []byte, err error) {
 	dst = buf
 
 	// Field (0) 'Epoch'
-	dst = ssz.MarshalUint64(dst, v.Epoch)
+	dst = ssz.MarshalUint(dst, v.Epoch)
 
 	// Field (1) 'ValidatorIndex'
-	dst = ssz.MarshalUint64(dst, v.ValidatorIndex)
+	dst = ssz.MarshalUint(dst, v.ValidatorIndex)
 
 	return
 }
@@ -1352,7 +1352,7 @@ func (e *Eth1Block) MarshalSSZTo(buf []byte) (dst []byte, err error) {
 	dst = buf
 
 	// Field (0) 'Timestamp'
-	dst = ssz.MarshalUint64(dst, e.Timestamp)
+	dst = ssz.MarshalUint(dst, e.Timestamp)
 
 	// Field (1) 'DepositRoot'
 	if size := len(e.DepositRoot); size != 32 {
@@ -1362,7 +1362,7 @@ func (e *Eth1Block) MarshalSSZTo(buf []byte) (dst []byte, err error) {
 	dst = append(dst, e.DepositRoot...)
 
 	// Field (2) 'DepositCount'
-	dst = ssz.MarshalUint64(dst, e.DepositCount)
+	dst = ssz.MarshalUint(dst, e.DepositCount)
 
 	return
 }
@@ -1439,7 +1439,7 @@ func (e *Eth1Data) MarshalSSZTo(buf []byte) (dst []byte, err error) {
 	dst = append(dst, e.DepositRoot...)
 
 	// Field (1) 'DepositCount'
-	dst = ssz.MarshalUint64(dst, e.DepositCount)
+	dst = ssz.MarshalUint(dst, e.DepositCount)
 
 	// Field (2) 'BlockHash'
 	if size := len(e.BlockHash); size != 32 {
@@ -1919,7 +1919,7 @@ func (b *BeaconState) MarshalSSZTo(buf []byte) (dst []byte, err error) {
 	offset := int(10325)
 
 	// Field (0) 'GenesisTime'
-	dst = ssz.MarshalUint64(dst, b.GenesisTime)
+	dst = ssz.MarshalUint(dst, b.GenesisTime)
 
 	// Field (1) 'GenesisValidatorsRoot'
 	if size := len(b.GenesisValidatorsRoot); size != 32 {
@@ -1929,7 +1929,7 @@ func (b *BeaconState) MarshalSSZTo(buf []byte) (dst []byte, err error) {
 	dst = append(dst, b.GenesisValidatorsRoot...)
 
 	// Field (2) 'Slot'
-	dst = ssz.MarshalUint64(dst, b.Slot)
+	dst = ssz.MarshalUint(dst, b.Slot)
 
 	// Field (3) 'Fork'
 	if b.Fork == nil {
@@ -1978,7 +1978,7 @@ func (b *BeaconState) MarshalSSZTo(buf []byte) (dst []byte, err error) {
 	offset += len(b.Eth1DataVotes) * 72
 
 	// Field (10) 'Eth1DepositIndex'
-	dst = ssz.MarshalUint64(dst, b.Eth1DepositIndex)
+	dst = ssz.MarshalUint(dst, b.Eth1DepositIndex)
 
 	// Offset (11) 'Validators'
 	dst = ssz.WriteOffset(dst, offset)
@@ -2007,7 +2007,7 @@ func (b *BeaconState) MarshalSSZTo(buf []byte) (dst []byte, err error) {
 		return
 	}
 	for ii := 0; ii < 64; ii++ {
-		dst = ssz.MarshalUint64(dst, b.Slashings[ii])
+		dst = ssz.MarshalUint(dst, b.Slashings[ii])
 	}
 
 	// Offset (15) 'PreviousEpochParticipation'
@@ -2106,7 +2106,7 @@ func (b *BeaconState) MarshalSSZTo(buf []byte) (dst []byte, err error) {
 		return
 	}
 	for ii := 0; ii < len(b.Balances); ii++ {
-		dst = ssz.MarshalUint64(dst, b.Balances[ii])
+		dst = ssz.MarshalUint(dst, b.Balances[ii])
 	}
 
 	// Field (15) 'PreviousEpochParticipation'
@@ -2115,7 +2115,7 @@ func (b *BeaconState) MarshalSSZTo(buf []byte) (dst []byte, err error) {
 		return
 	}
 	for ii := 0; ii < len(b.PreviousEpochParticipation); ii++ {
-		dst = ssz.MarshalUint8(dst, b.PreviousEpochParticipation[ii])
+		dst = ssz.MarshalUint(dst, b.PreviousEpochParticipation[ii])
 	}
 
 	// Field (16) 'CurrentEpochParticipation'
@@ -2124,7 +2124,7 @@ func (b *BeaconState) MarshalSSZTo(buf []byte) (dst []byte, err error) {
 		return
 	}
 	for ii := 0; ii < len(b.CurrentEpochParticipation); ii++ {
-		dst = ssz.MarshalUint8(dst, b.CurrentEpochParticipation[ii])
+		dst = ssz.MarshalUint(dst, b.CurrentEpochParticipation[ii])
 	}
 
 	// Field (21) 'InactivityScores'
@@ -2133,7 +2133,7 @@ func (b *BeaconState) MarshalSSZTo(buf []byte) (dst []byte, err error) {
 		return
 	}
 	for ii := 0; ii < len(b.InactivityScores); ii++ {
-		dst = ssz.MarshalUint64(dst, b.InactivityScores[ii])
+		dst = ssz.MarshalUint(dst, b.InactivityScores[ii])
 	}
 
 	return
@@ -2682,10 +2682,10 @@ func (b *BeaconBlock) MarshalSSZTo(buf []byte) (dst []byte, err error) {
 	offset := int(84)
 
 	// Field (0) 'Slot'
-	dst = ssz.MarshalUint64(dst, b.Slot)
+	dst = ssz.MarshalUint(dst, b.Slot)
 
 	// Field (1) 'ProposerIndex'
-	dst = ssz.MarshalUint64(dst, b.ProposerIndex)
+	dst = ssz.MarshalUint(dst, b.ProposerIndex)
 
 	// Field (2) 'ParentRoot'
 	if size := len(b.ParentRoot); size != 32 {
@@ -2937,19 +2937,19 @@ func (t *Transfer) MarshalSSZTo(buf []byte) (dst []byte, err error) {
 	dst = buf
 
 	// Field (0) 'Sender'
-	dst = ssz.MarshalUint64(dst, t.Sender)
+	dst = ssz.MarshalUint(dst, t.Sender)
 
 	// Field (1) 'Recipient'
-	dst = ssz.MarshalUint64(dst, t.Recipient)
+	dst = ssz.MarshalUint(dst, t.Recipient)
 
 	// Field (2) 'Amount'
-	dst = ssz.MarshalUint64(dst, t.Amount)
+	dst = ssz.MarshalUint(dst, t.Amount)
 
 	// Field (3) 'Fee'
-	dst = ssz.MarshalUint64(dst, t.Fee)
+	dst = ssz.MarshalUint(dst, t.Fee)
 
 	// Field (4) 'Slot'
-	dst = ssz.MarshalUint64(dst, t.Slot)
+	dst = ssz.MarshalUint(dst, t.Slot)
 
 	// Field (5) 'Pubkey'
 	if size := len(t.Pubkey); size != 48 {
@@ -3587,10 +3587,10 @@ func (b *BeaconBlockHeader) MarshalSSZTo(buf []byte) (dst []byte, err error) {
 	dst = buf
 
 	// Field (0) 'Slot'
-	dst = ssz.MarshalUint64(dst, b.Slot)
+	dst = ssz.MarshalUint(dst, b.Slot)
 
 	// Field (1) 'ProposerIndex'
-	dst = ssz.MarshalUint64(dst, b.ProposerIndex)
+	dst = ssz.MarshalUint(dst, b.ProposerIndex)
 
 	// Field (2) 'ParentRoot'
 	if size := len(b.ParentRoot); size != 32 {
@@ -4723,10 +4723,10 @@ func (b *BeaconBlockMinimal) MarshalSSZTo(buf []byte) (dst []byte, err error) {
 	offset := int(84)
 
 	// Field (0) 'Slot'
-	dst = ssz.MarshalUint64(dst, b.Slot)
+	dst = ssz.MarshalUint(dst, b.Slot)
 
 	// Field (1) 'ProposerIndex'
-	dst = ssz.MarshalUint64(dst, b.ProposerIndex)
+	dst = ssz.MarshalUint(dst, b.ProposerIndex)
 
 	// Field (2) 'ParentRoot'
 	if size := len(b.ParentRoot); size != 32 {
