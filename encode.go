@@ -40,19 +40,15 @@ type marshalUints interface {
 
 // MarshalUint marshals a little endian uint8, uint16, uint32, or uint64 to dst.
 func MarshalUint[T marshalUints](dst []byte, i T) []byte {
-	var buf [8]byte
 	switch unsafe.Sizeof(i) {
 	case 1:
 		return append(dst, byte(i))
 	case 2:
-		binary.LittleEndian.PutUint16(buf[:2], uint16(i))
-		return append(dst, buf[:2]...)
+		return binary.LittleEndian.AppendUint16(dst, uint16(i))
 	case 4:
-		binary.LittleEndian.PutUint32(buf[:4], uint32(i))
-		return append(dst, buf[:4]...)
+		return binary.LittleEndian.AppendUint32(dst, uint32(i))
 	case 8:
-		binary.LittleEndian.PutUint64(buf[:8], uint64(i))
-		return append(dst, buf[:8]...)
+		return binary.LittleEndian.AppendUint64(dst, uint64(i))
 	default:
 		panic("unsupported uint size")
 	}
