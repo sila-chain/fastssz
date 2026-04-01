@@ -1,13 +1,10 @@
-package main
+package generator
 
 import (
 	"fmt"
 	"strings"
 )
 
-// marshal creates a function that encodes the structs in SSZ format. It creates two functions:
-// 1. MarshalTo(dst []byte) marshals the content to the target array.
-// 2. Marshal() marshals the content to a newly created array.
 func (e *env) marshal(name string, v *Value) string {
 	tmpl := `// MarshalSSZ ssz marshals the {{.name}} object
 	func (:: *{{.name}}) MarshalSSZ() ([]byte, error) {
@@ -28,7 +25,6 @@ func (e *env) marshal(name string, v *Value) string {
 		"offset":  "",
 	}
 	if !v.isFixed() {
-		// offset is the position where the offset starts
 		data["offset"] = fmt.Sprintf("offset := int(%d)\n", v.fixedSize())
 	}
 	str := execTmpl(tmpl, data)
@@ -78,7 +74,6 @@ func (v *Value) marshal() string {
 func (v *Value) marshalList() string {
 	v.e.name = v.name + "[ii]"
 
-	// bound check
 	str := v.validate()
 
 	if v.e.isFixed() {
@@ -91,10 +86,6 @@ func (v *Value) marshalList() string {
 		})
 		return str
 	}
-
-	// encode a list of dynamic objects:
-	// 1. write offsets for each
-	// 2. marshal each element
 
 	tmpl := `{
 		offset = 4 * len(::.{{.name}})
@@ -137,7 +128,6 @@ func (v *Value) marshalContainer(start bool) string {
 		{{ end }}if dst, err = ::.{{.name}}.MarshalSSZTo(dst); err != nil {
 			return
 		}`
-		// validate only for fixed structs
 		check := v.isFixed()
 		if v.isListElem() {
 			check = false
@@ -158,17 +148,14 @@ func (v *Value) marshalContainer(start bool) string {
 	for indx, i := range v.o {
 		var str string
 		if i.isFixed() {
-			// write the content
 			str = fmt.Sprintf("// Field (%d) '%s'\n%s\n", indx, i.name, i.marshal())
 		} else {
-			// write the offset
 			str = fmt.Sprintf("// Offset (%d) '%s'\ndst = ssz.WriteOffset(dst, offset)\n%s\n", indx, i.name, i.size("offset"))
 			offset += i.fixedSize()
 		}
 		out = append(out, str)
 	}
 
-	// write the dynamic parts
 	for indx, i := range v.o {
 		if !i.isFixed() {
 			out = append(out, fmt.Sprintf("// Field (%d) '%s'\n%s\n", indx, i.name, i.marshal()))

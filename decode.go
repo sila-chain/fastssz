@@ -5,28 +5,58 @@ import (
 	"errors"
 	"fmt"
 	"math/bits"
+	"unsafe"
 )
 
 const bytesPerLengthOffset = 4
 
-// UnmarshallUint64 unmarshals a little endian uint64 from the src input
+type unmarshallUints interface {
+	~uint8 | ~uint16 | ~uint32 | ~uint64
+}
+
+// UnmarshallUint unmarshals a little endian uint8, uint16, uint32, or uint64 from the src input.
+func UnmarshallUint[T unmarshallUints](src []byte) T {
+	var zero T
+	switch unsafe.Sizeof(zero) {
+	case 1:
+		return T(src[0])
+	case 2:
+		return T(binary.LittleEndian.Uint16(src[:2]))
+	case 4:
+		return T(binary.LittleEndian.Uint32(src[:4]))
+	case 8:
+		return T(binary.LittleEndian.Uint64(src[:8]))
+	default:
+		panic("unsupported uint size")
+	}
+}
+
+// UnmarshallUint64 unmarshals a little endian uint64 from the src input.
+//
+// Deprecated: use UnmarshallUint instead.
 func UnmarshallUint64(src []byte) uint64 {
-	return binary.LittleEndian.Uint64(src)
+	return UnmarshallUint[uint64](src)
 }
 
-// UnmarshallUint32 unmarshals a little endian uint32 from the src input
+// UnmarshallUint32 unmarshals a little endian uint32 from the src input.
+//
+// Deprecated: use UnmarshallUint instead.
 func UnmarshallUint32(src []byte) uint32 {
-	return binary.LittleEndian.Uint32(src[:4])
+	return UnmarshallUint[uint32](src)
 }
 
-// UnmarshallUint16 unmarshals a little endian uint16 from the src input
+// UnmarshallUint16 unmarshals a little endian uint16 from the src input.
+//
+// Deprecated: use UnmarshallUint instead.
 func UnmarshallUint16(src []byte) uint16 {
-	return binary.LittleEndian.Uint16(src[:2])
+	return UnmarshallUint[uint16](src)
 }
 
-// UnmarshallUint8 unmarshals a little endian uint8 from the src input
+// UnmarshallUint8 unmarshals a little endian uint8 from the src input.
+//
+// Deprecated: use UnmarshallUint instead.
 func UnmarshallUint8(src []byte) uint8 {
-	return uint8(src[0])
+	return UnmarshallUint[uint8](src)
 }
 
 // UnmarshalBool unmarshals a boolean from the src input
@@ -165,31 +195,38 @@ func DivideInt(a, b int) (int, bool) {
 	return a / b, a%b == 0
 }
 
-// ExtendUint64 extends a uint64 buffer to a given size
+type uints interface {
+	~uint8 | ~uint16 | ~uint64
+}
+
+// ExtendUint extends an unsigned integer buffer to a given size.
+func ExtendUint[T uints](b []T, needLen int) []T {
+	b = b[:cap(b)]
+	if n := needLen - cap(b); n > 0 {
+		b = append(b, make([]T, n)...)
+	}
+	return b[:needLen]
+}
+
+// ExtendUint64 extends a uint64 buffer to a given size.
+//
+// Deprecated: use ExtendUint instead.
 func ExtendUint64(b []uint64, needLen int) []uint64 {
-	b = b[:cap(b)]
-	if n := needLen - cap(b); n > 0 {
-		b = append(b, make([]uint64, n)...)
-	}
-	return b[:needLen]
+	return ExtendUint(b, needLen)
 }
 
-// ExtendUint16 extends a uint16 buffer to a given size
+// ExtendUint16 extends a uint16 buffer to a given size.
+//
+// Deprecated: use ExtendUint instead.
 func ExtendUint16(b []uint16, needLen int) []uint16 {
-	b = b[:cap(b)]
-	if n := needLen - cap(b); n > 0 {
-		b = append(b, make([]uint16, n)...)
-	}
-	return b[:needLen]
+	return ExtendUint(b, needLen)
 }
 
-// ExtendUint8 extends a uint16 buffer to a given size
+// ExtendUint8 extends a uint8 buffer to a given size.
+//
+// Deprecated: use ExtendUint instead.
 func ExtendUint8(b []uint8, needLen int) []uint8 {
-	b = b[:cap(b)]
-	if n := needLen - cap(b); n > 0 {
-		b = append(b, make([]uint8, n)...)
-	}
-	return b[:needLen]
+	return ExtendUint(b, needLen)
 }
 
 // ReadOffset reads an offset from buf

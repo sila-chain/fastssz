@@ -1,4 +1,4 @@
-package main
+package generator
 
 import (
 	"fmt"
@@ -6,7 +6,6 @@ import (
 	"strings"
 )
 
-// unmarshal creates a function that decodes the structs with the input byte in SSZ format.
 func (e *env) unmarshal(name string, v *Value) string {
 	tmpl := `// UnmarshalSSZ ssz unmarshals the {{.name}} object
 	func (:: *{{.name}}) UnmarshalSSZ(buf []byte) error {
@@ -24,7 +23,6 @@ func (e *env) unmarshal(name string, v *Value) string {
 }
 
 func (v *Value) unmarshal(dst string) string {
-	// we use dst as the input buffer where the SSZ data to decode the value is.
 	switch v.t {
 	case TypeContainer, TypeReference:
 		return v.umarshalContainer(false, dst)
@@ -35,10 +33,8 @@ func (v *Value) unmarshal(dst string) string {
 		}
 		validate := ""
 		if !v.isFixed() {
-			// dynamic bytes, we need to validate the size of the buffer
 			validate = fmt.Sprintf("if len(%s) > %d { return ssz.ErrBytesLength }\n", dst, v.m)
 		}
-		// both fixed and dynamic are decoded equally
 		tmpl := `{{.validate}}if cap(::.{{.name}}) == 0 {
 			::.{{.name}} = make([]byte, 0, len({{.dst}}))
 		}
@@ -47,7 +43,6 @@ func (v *Value) unmarshal(dst string) string {
 			"validate": validate,
 			"name":     v.name,
 			"dst":      dst,
-			"size":     v.m,
 		})
 
 	case TypeUint:
@@ -93,18 +88,14 @@ func (v *Value) unmarshal(dst string) string {
 		return v.unmarshalList()
 
 	case TypeBool:
-		return unbTmpl(v.name, dst)
+		return fmt.Sprintf(`::.%s, err = ssz.DecodeBool(%s)
+	    if err != nil {
+		return err
+	}`, v.name, dst)
 
 	default:
 		panic(fmt.Errorf("unmarshal not implemented for type %d", v.t))
 	}
-}
-
-func unbTmpl(name, dst string) string {
-	return fmt.Sprintf(`::.%s, err = ssz.DecodeBool(%s)
-	    if err != nil {
-		return err
-	}`, name, dst)
 }
 
 func (v *Value) unmarshalList() string {
@@ -130,9 +121,6 @@ func (v *Value) unmarshalList() string {
 	if v.t == TypeVector {
 		panic("it cannot happen")
 	}
-
-	// Decode list with a dynamic element. 'ssz.DecodeDynamicLength' ensures
-	// that the number of elements do not surpass the 'ssz-max' tag.
 
 	tmpl := `num, err := ssz.DecodeDynamicLength(buf, {{.max}})
 	if err != nil {
@@ -190,18 +178,10 @@ func (v *Value) umarshalContainer(start bool, dst string) (str string) {
 		}
 	}
 
-	// safe check for the size. Two cases:
-	// 1. Struct is fixed: The size of the input buffer must be the same as the struct.
-	// 2. Struct is dynamic. The size of the input buffer must be higher than the fixed part of the struct.
-
-	var cmp string
+	cmp := "<"
 	if v.isFixed() {
 		cmp = "!="
-	} else {
-		cmp = "<"
 	}
-
-	// If the struct is dynamic we create a set of offset variables that will be readed later.
 
 	tmpl := `size := uint64(len(buf))
 	if size {{.cmp}} {{.size}} {
@@ -220,18 +200,9 @@ func (v *Value) umarshalContainer(start bool, dst string) (str string) {
 	})
 
 	var o0 uint64
-
-	// Marshal the fixed part and offsets
-
-	// used for bounds checking of variable length offsets.
-	// for the first offset, use the size of the fixed-length data
-	// as the minimum boundary. subsequent offsets will replace this
-	// value with the name of the previous offset variable.
 	firstOffsetCheck := fmt.Sprintf("%d", v.fixedSize())
 	outs := []string{}
 	for indx, i := range v.o {
-
-		// How much it increases on every item
 		var incr uint64
 		if i.isFixed() {
 			incr = i.fixedSize()
@@ -245,11 +216,8 @@ func (v *Value) umarshalContainer(start bool, dst string) (str string) {
 		var res string
 		if i.isFixed() {
 			res = fmt.Sprintf("// Field (%d) '%s'\n%s\n\n", indx, i.name, i.unmarshal(dst))
-
 		} else {
-			// read the offset
 			offset := "o" + strconv.Itoa(indx)
-
 			data := map[string]interface{}{
 				"indx":             indx,
 				"name":             i.name,
@@ -257,11 +225,6 @@ func (v *Value) umarshalContainer(start bool, dst string) (str string) {
 				"dst":              dst,
 				"firstOffsetCheck": firstOffsetCheck,
 			}
-
-			// We need to do two validations for the offset:
-			// 1. The offset is lower than the total size of the input buffer
-			// 2. The offset i needs to be higher than the offset i-1 (Only if the offset is not the first).
-
 			if prev, ok := offsetsMatch[offset]; ok {
 				data["more"] = fmt.Sprintf(" || %s > %s", prev, offset)
 			} else {
@@ -284,17 +247,12 @@ func (v *Value) umarshalContainer(start bool, dst string) (str string) {
 		outs = append(outs, res)
 	}
 
-	// Marshal the dynamic parts
-
 	c := 0
-
 	for indx, i := range v.o {
 		if !i.isFixed() {
 			from := offsets[c]
-			var to string
-			if c == len(offsets)-1 {
-				to = ""
-			} else {
+			to := ""
+			if c != len(offsets)-1 {
 				to = offsets[c+1]
 			}
 			tmpl := `// Field ({{.indx}}) '{{.name}}'
@@ -318,29 +276,22 @@ func (v *Value) umarshalContainer(start bool, dst string) (str string) {
 	return
 }
 
-// createItem is used to initialize slices of objects
 func (v *Value) createSlice(useNumVariable bool) string {
 	if v.t != TypeVector && v.t != TypeList {
 		panic("BUG: create item is only intended to be used with vectors and lists")
 	}
 
 	size := strconv.Itoa(int(v.s))
-	// when useNumVariable is specified, we assume there is a 'num' variable generated beforehand with the expected size.
 	if useNumVariable {
 		size = "num"
 	}
 
 	switch v.e.t {
 	case TypeUint:
-		// []int uses the Extend functions in the fastssz package
 		return fmt.Sprintf("::.%s = ssz.ExtendUint(::.%s, %s)", v.name, v.name, size)
-
 	case TypeContainer:
-		// []*(ref.)Struct{}
 		return fmt.Sprintf("::.%s = make([]*%s, %s)", v.name, v.e.objRef(), size)
-
 	case TypeBytes:
-		// [][]byte
 		if v.c {
 			return ""
 		}
@@ -348,7 +299,6 @@ func (v *Value) createSlice(useNumVariable bool) string {
 			return fmt.Sprintf("::.%s = make([][%d]byte, %s)", v.name, v.e.s, size)
 		}
 		return fmt.Sprintf("::.%s = make([][]byte, %s)", v.name, size)
-
 	default:
 		panic(fmt.Sprintf("create not implemented for type %s", v.e.t.String()))
 	}

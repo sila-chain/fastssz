@@ -19,7 +19,7 @@ func (a *AggregateAndProof) MarshalSSZTo(buf []byte) (dst []byte, err error) {
 	offset := int(108)
 
 	// Field (0) 'Index'
-	dst = ssz.MarshalUint64(dst, a.Index)
+	dst = ssz.MarshalUint(dst, a.Index)
 
 	// Offset (1) 'Aggregate'
 	dst = ssz.WriteOffset(dst, offset)
@@ -53,14 +53,14 @@ func (a *AggregateAndProof) UnmarshalSSZ(buf []byte) error {
 	var o1 uint64
 
 	// Field (0) 'Index'
-	a.Index = ssz.UnmarshallUint64(buf[0:8])
+	a.Index = ssz.UnmarshallUint[uint64](buf[0:8])
 
 	// Offset (1) 'Aggregate'
 	if o1 = ssz.ReadOffset(buf[8:12]); o1 > size {
 		return ssz.ErrOffset
 	}
 
-	if o1 < 108 {
+	if o1 != 108 {
 		return ssz.ErrInvalidVariableOffset
 	}
 
@@ -105,7 +105,7 @@ func (a *AggregateAndProof) HashTreeRootWith(hh *ssz.Hasher) (err error) {
 	indx := hh.Index()
 
 	// Field (0) 'Index'
-	hh.PutUint64(a.Index)
+	ssz.PutUint(hh, a.Index)
 
 	// Field (1) 'Aggregate'
 	if err = a.Aggregate.HashTreeRootWith(hh); err != nil {
@@ -131,7 +131,7 @@ func (c *Checkpoint) MarshalSSZTo(buf []byte) (dst []byte, err error) {
 	dst = buf
 
 	// Field (0) 'Epoch'
-	dst = ssz.MarshalUint64(dst, uint64(c.Epoch))
+	dst = ssz.MarshalUint(dst, c.Epoch)
 
 	// Field (1) 'Root'
 	if size := len(c.Root); size != 32 {
@@ -152,7 +152,7 @@ func (c *Checkpoint) UnmarshalSSZ(buf []byte) error {
 	}
 
 	// Field (0) 'Epoch'
-	c.Epoch = external2.EpochAlias(ssz.UnmarshallUint64(buf[0:8]))
+	c.Epoch = ssz.UnmarshallUint[external2.EpochAlias](buf[0:8])
 
 	// Field (1) 'Root'
 	if cap(c.Root) == 0 {
@@ -179,7 +179,7 @@ func (c *Checkpoint) HashTreeRootWith(hh *ssz.Hasher) (err error) {
 	indx := hh.Index()
 
 	// Field (0) 'Epoch'
-	hh.PutUint64(uint64(c.Epoch))
+	ssz.PutUint(hh, c.Epoch)
 
 	// Field (1) 'Root'
 	if size := len(c.Root); size != 32 {
@@ -202,10 +202,10 @@ func (a *AttestationData) MarshalSSZTo(buf []byte) (dst []byte, err error) {
 	dst = buf
 
 	// Field (0) 'Slot'
-	dst = ssz.MarshalUint64(dst, uint64(a.Slot))
+	dst = ssz.MarshalUint(dst, a.Slot)
 
 	// Field (1) 'Index'
-	dst = ssz.MarshalUint64(dst, a.Index)
+	dst = ssz.MarshalUint(dst, a.Index)
 
 	// Field (2) 'BeaconBlockHash'
 	dst = append(dst, a.BeaconBlockHash[:]...)
@@ -238,10 +238,10 @@ func (a *AttestationData) UnmarshalSSZ(buf []byte) error {
 	}
 
 	// Field (0) 'Slot'
-	a.Slot = Slot(ssz.UnmarshallUint64(buf[0:8]))
+	a.Slot = ssz.UnmarshallUint[Slot](buf[0:8])
 
 	// Field (1) 'Index'
-	a.Index = ssz.UnmarshallUint64(buf[8:16])
+	a.Index = ssz.UnmarshallUint[uint64](buf[8:16])
 
 	// Field (2) 'BeaconBlockHash'
 	copy(a.BeaconBlockHash[:], buf[16:48])
@@ -281,10 +281,10 @@ func (a *AttestationData) HashTreeRootWith(hh *ssz.Hasher) (err error) {
 	indx := hh.Index()
 
 	// Field (0) 'Slot'
-	hh.PutUint64(uint64(a.Slot))
+	ssz.PutUint(hh, a.Slot)
 
 	// Field (1) 'Index'
-	hh.PutUint64(a.Index)
+	ssz.PutUint(hh, a.Index)
 
 	// Field (2) 'BeaconBlockHash'
 	hh.PutBytes(a.BeaconBlockHash[:])
@@ -359,7 +359,7 @@ func (a *Attestation) UnmarshalSSZ(buf []byte) error {
 		return ssz.ErrOffset
 	}
 
-	if o0 < 228 {
+	if o0 != 228 {
 		return ssz.ErrInvalidVariableOffset
 	}
 
@@ -449,7 +449,7 @@ func (d *DepositData) MarshalSSZTo(buf []byte) (dst []byte, err error) {
 	dst = append(dst, d.WithdrawalCredentials[:]...)
 
 	// Field (2) 'Amount'
-	dst = ssz.MarshalUint64(dst, d.Amount)
+	dst = ssz.MarshalUint(dst, d.Amount)
 
 	// Field (3) 'Signature'
 	if size := len(d.Signature); size != 96 {
@@ -476,7 +476,7 @@ func (d *DepositData) UnmarshalSSZ(buf []byte) error {
 	copy(d.WithdrawalCredentials[:], buf[48:80])
 
 	// Field (2) 'Amount'
-	d.Amount = ssz.UnmarshallUint64(buf[80:88])
+	d.Amount = ssz.UnmarshallUint[uint64](buf[80:88])
 
 	// Field (3) 'Signature'
 	if cap(d.Signature) == 0 {
@@ -509,7 +509,7 @@ func (d *DepositData) HashTreeRootWith(hh *ssz.Hasher) (err error) {
 	hh.PutBytes(d.WithdrawalCredentials[:])
 
 	// Field (2) 'Amount'
-	hh.PutUint64(d.Amount)
+	ssz.PutUint(hh, d.Amount)
 
 	// Field (3) 'Signature'
 	if size := len(d.Signature); size != 96 {
@@ -648,7 +648,7 @@ func (d *DepositMessage) MarshalSSZTo(buf []byte) (dst []byte, err error) {
 	dst = append(dst, d.WithdrawalCredentials...)
 
 	// Field (2) 'Amount'
-	dst = ssz.MarshalUint64(dst, d.Amount)
+	dst = ssz.MarshalUint(dst, d.Amount)
 
 	return
 }
@@ -674,7 +674,7 @@ func (d *DepositMessage) UnmarshalSSZ(buf []byte) error {
 	d.WithdrawalCredentials = append(d.WithdrawalCredentials, buf[48:80]...)
 
 	// Field (2) 'Amount'
-	d.Amount = ssz.UnmarshallUint64(buf[80:88])
+	d.Amount = ssz.UnmarshallUint[uint64](buf[80:88])
 
 	return err
 }
@@ -709,7 +709,7 @@ func (d *DepositMessage) HashTreeRootWith(hh *ssz.Hasher) (err error) {
 	hh.PutBytes(d.WithdrawalCredentials)
 
 	// Field (2) 'Amount'
-	hh.PutUint64(d.Amount)
+	ssz.PutUint(hh, d.Amount)
 
 	hh.Merkleize(indx)
 	return
@@ -750,7 +750,7 @@ func (i *IndexedAttestation) MarshalSSZTo(buf []byte) (dst []byte, err error) {
 		return
 	}
 	for ii := 0; ii < len(i.AttestationIndices); ii++ {
-		dst = ssz.MarshalUint64(dst, i.AttestationIndices[ii])
+		dst = ssz.MarshalUint(dst, i.AttestationIndices[ii])
 	}
 
 	return
@@ -772,7 +772,7 @@ func (i *IndexedAttestation) UnmarshalSSZ(buf []byte) error {
 		return ssz.ErrOffset
 	}
 
-	if o0 < 228 {
+	if o0 != 228 {
 		return ssz.ErrInvalidVariableOffset
 	}
 
@@ -797,9 +797,9 @@ func (i *IndexedAttestation) UnmarshalSSZ(buf []byte) error {
 		if err != nil {
 			return err
 		}
-		i.AttestationIndices = ssz.ExtendUint64(i.AttestationIndices, num)
+		i.AttestationIndices = ssz.ExtendUint(i.AttestationIndices, num)
 		for ii := 0; ii < num; ii++ {
-			i.AttestationIndices[ii] = ssz.UnmarshallUint64(buf[ii*8 : (ii+1)*8])
+			i.AttestationIndices[ii] = ssz.UnmarshallUint[uint64](buf[ii*8 : (ii+1)*8])
 		}
 	}
 	return err
@@ -832,7 +832,7 @@ func (i *IndexedAttestation) HashTreeRootWith(hh *ssz.Hasher) (err error) {
 		}
 		subIndx := hh.Index()
 		for _, i := range i.AttestationIndices {
-			hh.AppendUint64(i)
+			ssz.AppendUint(hh, i)
 		}
 		hh.FillUpTo32()
 
@@ -879,10 +879,10 @@ func (p *PendingAttestation) MarshalSSZTo(buf []byte) (dst []byte, err error) {
 	}
 
 	// Field (2) 'InclusionDelay'
-	dst = ssz.MarshalUint64(dst, p.InclusionDelay)
+	dst = ssz.MarshalUint(dst, p.InclusionDelay)
 
 	// Field (3) 'ProposerIndex'
-	dst = ssz.MarshalUint64(dst, p.ProposerIndex)
+	dst = ssz.MarshalUint(dst, p.ProposerIndex)
 
 	// Field (0) 'AggregationBits'
 	if size := len(p.AggregationBits); size > 2048 {
@@ -910,7 +910,7 @@ func (p *PendingAttestation) UnmarshalSSZ(buf []byte) error {
 		return ssz.ErrOffset
 	}
 
-	if o0 < 148 {
+	if o0 != 148 {
 		return ssz.ErrInvalidVariableOffset
 	}
 
@@ -923,10 +923,10 @@ func (p *PendingAttestation) UnmarshalSSZ(buf []byte) error {
 	}
 
 	// Field (2) 'InclusionDelay'
-	p.InclusionDelay = ssz.UnmarshallUint64(buf[132:140])
+	p.InclusionDelay = ssz.UnmarshallUint[uint64](buf[132:140])
 
 	// Field (3) 'ProposerIndex'
-	p.ProposerIndex = ssz.UnmarshallUint64(buf[140:148])
+	p.ProposerIndex = ssz.UnmarshallUint[uint64](buf[140:148])
 
 	// Field (0) 'AggregationBits'
 	{
@@ -974,10 +974,10 @@ func (p *PendingAttestation) HashTreeRootWith(hh *ssz.Hasher) (err error) {
 	}
 
 	// Field (2) 'InclusionDelay'
-	hh.PutUint64(p.InclusionDelay)
+	ssz.PutUint(hh, p.InclusionDelay)
 
 	// Field (3) 'ProposerIndex'
-	hh.PutUint64(p.ProposerIndex)
+	ssz.PutUint(hh, p.ProposerIndex)
 
 	hh.Merkleize(indx)
 	return
@@ -1007,7 +1007,7 @@ func (f *Fork) MarshalSSZTo(buf []byte) (dst []byte, err error) {
 	dst = append(dst, f.CurrentVersion...)
 
 	// Field (2) 'Epoch'
-	dst = ssz.MarshalUint64(dst, f.Epoch)
+	dst = ssz.MarshalUint(dst, f.Epoch)
 
 	return
 }
@@ -1033,7 +1033,7 @@ func (f *Fork) UnmarshalSSZ(buf []byte) error {
 	f.CurrentVersion = append(f.CurrentVersion, buf[4:8]...)
 
 	// Field (2) 'Epoch'
-	f.Epoch = ssz.UnmarshallUint64(buf[8:16])
+	f.Epoch = ssz.UnmarshallUint[uint64](buf[8:16])
 
 	return err
 }
@@ -1068,7 +1068,7 @@ func (f *Fork) HashTreeRootWith(hh *ssz.Hasher) (err error) {
 	hh.PutBytes(f.CurrentVersion)
 
 	// Field (2) 'Epoch'
-	hh.PutUint64(f.Epoch)
+	ssz.PutUint(hh, f.Epoch)
 
 	hh.Merkleize(indx)
 	return
@@ -1098,22 +1098,22 @@ func (v *Validator) MarshalSSZTo(buf []byte) (dst []byte, err error) {
 	dst = append(dst, v.WithdrawalCredentials...)
 
 	// Field (2) 'EffectiveBalance'
-	dst = ssz.MarshalUint64(dst, v.EffectiveBalance)
+	dst = ssz.MarshalUint(dst, v.EffectiveBalance)
 
 	// Field (3) 'Slashed'
 	dst = ssz.MarshalBool(dst, v.Slashed)
 
 	// Field (4) 'ActivationEligibilityEpoch'
-	dst = ssz.MarshalUint64(dst, v.ActivationEligibilityEpoch)
+	dst = ssz.MarshalUint(dst, v.ActivationEligibilityEpoch)
 
 	// Field (5) 'ActivationEpoch'
-	dst = ssz.MarshalUint64(dst, v.ActivationEpoch)
+	dst = ssz.MarshalUint(dst, v.ActivationEpoch)
 
 	// Field (6) 'ExitEpoch'
-	dst = ssz.MarshalUint64(dst, v.ExitEpoch)
+	dst = ssz.MarshalUint(dst, v.ExitEpoch)
 
 	// Field (7) 'WithdrawableEpoch'
-	dst = ssz.MarshalUint64(dst, v.WithdrawableEpoch)
+	dst = ssz.MarshalUint(dst, v.WithdrawableEpoch)
 
 	return
 }
@@ -1139,22 +1139,25 @@ func (v *Validator) UnmarshalSSZ(buf []byte) error {
 	v.WithdrawalCredentials = append(v.WithdrawalCredentials, buf[48:80]...)
 
 	// Field (2) 'EffectiveBalance'
-	v.EffectiveBalance = ssz.UnmarshallUint64(buf[80:88])
+	v.EffectiveBalance = ssz.UnmarshallUint[uint64](buf[80:88])
 
 	// Field (3) 'Slashed'
-	v.Slashed = ssz.UnmarshalBool(buf[88:89])
+	v.Slashed, err = ssz.DecodeBool(buf[88:89])
+	if err != nil {
+		return err
+	}
 
 	// Field (4) 'ActivationEligibilityEpoch'
-	v.ActivationEligibilityEpoch = ssz.UnmarshallUint64(buf[89:97])
+	v.ActivationEligibilityEpoch = ssz.UnmarshallUint[uint64](buf[89:97])
 
 	// Field (5) 'ActivationEpoch'
-	v.ActivationEpoch = ssz.UnmarshallUint64(buf[97:105])
+	v.ActivationEpoch = ssz.UnmarshallUint[uint64](buf[97:105])
 
 	// Field (6) 'ExitEpoch'
-	v.ExitEpoch = ssz.UnmarshallUint64(buf[105:113])
+	v.ExitEpoch = ssz.UnmarshallUint[uint64](buf[105:113])
 
 	// Field (7) 'WithdrawableEpoch'
-	v.WithdrawableEpoch = ssz.UnmarshallUint64(buf[113:121])
+	v.WithdrawableEpoch = ssz.UnmarshallUint[uint64](buf[113:121])
 
 	return err
 }
@@ -1189,22 +1192,22 @@ func (v *Validator) HashTreeRootWith(hh *ssz.Hasher) (err error) {
 	hh.PutBytes(v.WithdrawalCredentials)
 
 	// Field (2) 'EffectiveBalance'
-	hh.PutUint64(v.EffectiveBalance)
+	ssz.PutUint(hh, v.EffectiveBalance)
 
 	// Field (3) 'Slashed'
 	hh.PutBool(v.Slashed)
 
 	// Field (4) 'ActivationEligibilityEpoch'
-	hh.PutUint64(v.ActivationEligibilityEpoch)
+	ssz.PutUint(hh, v.ActivationEligibilityEpoch)
 
 	// Field (5) 'ActivationEpoch'
-	hh.PutUint64(v.ActivationEpoch)
+	ssz.PutUint(hh, v.ActivationEpoch)
 
 	// Field (6) 'ExitEpoch'
-	hh.PutUint64(v.ExitEpoch)
+	ssz.PutUint(hh, v.ExitEpoch)
 
 	// Field (7) 'WithdrawableEpoch'
-	hh.PutUint64(v.WithdrawableEpoch)
+	ssz.PutUint(hh, v.WithdrawableEpoch)
 
 	hh.Merkleize(indx)
 	return
@@ -1220,10 +1223,10 @@ func (v *VoluntaryExit) MarshalSSZTo(buf []byte) (dst []byte, err error) {
 	dst = buf
 
 	// Field (0) 'Epoch'
-	dst = ssz.MarshalUint64(dst, v.Epoch)
+	dst = ssz.MarshalUint(dst, v.Epoch)
 
 	// Field (1) 'ValidatorIndex'
-	dst = ssz.MarshalUint64(dst, v.ValidatorIndex)
+	dst = ssz.MarshalUint(dst, v.ValidatorIndex)
 
 	return
 }
@@ -1237,10 +1240,10 @@ func (v *VoluntaryExit) UnmarshalSSZ(buf []byte) error {
 	}
 
 	// Field (0) 'Epoch'
-	v.Epoch = ssz.UnmarshallUint64(buf[0:8])
+	v.Epoch = ssz.UnmarshallUint[uint64](buf[0:8])
 
 	// Field (1) 'ValidatorIndex'
-	v.ValidatorIndex = ssz.UnmarshallUint64(buf[8:16])
+	v.ValidatorIndex = ssz.UnmarshallUint[uint64](buf[8:16])
 
 	return err
 }
@@ -1261,10 +1264,10 @@ func (v *VoluntaryExit) HashTreeRootWith(hh *ssz.Hasher) (err error) {
 	indx := hh.Index()
 
 	// Field (0) 'Epoch'
-	hh.PutUint64(v.Epoch)
+	ssz.PutUint(hh, v.Epoch)
 
 	// Field (1) 'ValidatorIndex'
-	hh.PutUint64(v.ValidatorIndex)
+	ssz.PutUint(hh, v.ValidatorIndex)
 
 	hh.Merkleize(indx)
 	return
@@ -1352,7 +1355,7 @@ func (e *Eth1Block) MarshalSSZTo(buf []byte) (dst []byte, err error) {
 	dst = buf
 
 	// Field (0) 'Timestamp'
-	dst = ssz.MarshalUint64(dst, e.Timestamp)
+	dst = ssz.MarshalUint(dst, e.Timestamp)
 
 	// Field (1) 'DepositRoot'
 	if size := len(e.DepositRoot); size != 32 {
@@ -1362,7 +1365,7 @@ func (e *Eth1Block) MarshalSSZTo(buf []byte) (dst []byte, err error) {
 	dst = append(dst, e.DepositRoot...)
 
 	// Field (2) 'DepositCount'
-	dst = ssz.MarshalUint64(dst, e.DepositCount)
+	dst = ssz.MarshalUint(dst, e.DepositCount)
 
 	return
 }
@@ -1376,7 +1379,7 @@ func (e *Eth1Block) UnmarshalSSZ(buf []byte) error {
 	}
 
 	// Field (0) 'Timestamp'
-	e.Timestamp = ssz.UnmarshallUint64(buf[0:8])
+	e.Timestamp = ssz.UnmarshallUint[uint64](buf[0:8])
 
 	// Field (1) 'DepositRoot'
 	if cap(e.DepositRoot) == 0 {
@@ -1385,7 +1388,7 @@ func (e *Eth1Block) UnmarshalSSZ(buf []byte) error {
 	e.DepositRoot = append(e.DepositRoot, buf[8:40]...)
 
 	// Field (2) 'DepositCount'
-	e.DepositCount = ssz.UnmarshallUint64(buf[40:48])
+	e.DepositCount = ssz.UnmarshallUint[uint64](buf[40:48])
 
 	return err
 }
@@ -1406,7 +1409,7 @@ func (e *Eth1Block) HashTreeRootWith(hh *ssz.Hasher) (err error) {
 	indx := hh.Index()
 
 	// Field (0) 'Timestamp'
-	hh.PutUint64(e.Timestamp)
+	ssz.PutUint(hh, e.Timestamp)
 
 	// Field (1) 'DepositRoot'
 	if size := len(e.DepositRoot); size != 32 {
@@ -1416,7 +1419,7 @@ func (e *Eth1Block) HashTreeRootWith(hh *ssz.Hasher) (err error) {
 	hh.PutBytes(e.DepositRoot)
 
 	// Field (2) 'DepositCount'
-	hh.PutUint64(e.DepositCount)
+	ssz.PutUint(hh, e.DepositCount)
 
 	hh.Merkleize(indx)
 	return
@@ -1439,7 +1442,7 @@ func (e *Eth1Data) MarshalSSZTo(buf []byte) (dst []byte, err error) {
 	dst = append(dst, e.DepositRoot...)
 
 	// Field (1) 'DepositCount'
-	dst = ssz.MarshalUint64(dst, e.DepositCount)
+	dst = ssz.MarshalUint(dst, e.DepositCount)
 
 	// Field (2) 'BlockHash'
 	if size := len(e.BlockHash); size != 32 {
@@ -1466,7 +1469,7 @@ func (e *Eth1Data) UnmarshalSSZ(buf []byte) error {
 	e.DepositRoot = append(e.DepositRoot, buf[0:32]...)
 
 	// Field (1) 'DepositCount'
-	e.DepositCount = ssz.UnmarshallUint64(buf[32:40])
+	e.DepositCount = ssz.UnmarshallUint[uint64](buf[32:40])
 
 	// Field (2) 'BlockHash'
 	if cap(e.BlockHash) == 0 {
@@ -1500,7 +1503,7 @@ func (e *Eth1Data) HashTreeRootWith(hh *ssz.Hasher) (err error) {
 	hh.PutBytes(e.DepositRoot)
 
 	// Field (1) 'DepositCount'
-	hh.PutUint64(e.DepositCount)
+	ssz.PutUint(hh, e.DepositCount)
 
 	// Field (2) 'BlockHash'
 	if size := len(e.BlockHash); size != 32 {
@@ -1833,7 +1836,7 @@ func (a *AttesterSlashing) UnmarshalSSZ(buf []byte) error {
 		return ssz.ErrOffset
 	}
 
-	if o0 < 8 {
+	if o0 != 8 {
 		return ssz.ErrInvalidVariableOffset
 	}
 
@@ -1919,7 +1922,7 @@ func (b *BeaconState) MarshalSSZTo(buf []byte) (dst []byte, err error) {
 	offset := int(10325)
 
 	// Field (0) 'GenesisTime'
-	dst = ssz.MarshalUint64(dst, b.GenesisTime)
+	dst = ssz.MarshalUint(dst, b.GenesisTime)
 
 	// Field (1) 'GenesisValidatorsRoot'
 	if size := len(b.GenesisValidatorsRoot); size != 32 {
@@ -1929,7 +1932,7 @@ func (b *BeaconState) MarshalSSZTo(buf []byte) (dst []byte, err error) {
 	dst = append(dst, b.GenesisValidatorsRoot...)
 
 	// Field (2) 'Slot'
-	dst = ssz.MarshalUint64(dst, b.Slot)
+	dst = ssz.MarshalUint(dst, b.Slot)
 
 	// Field (3) 'Fork'
 	if b.Fork == nil {
@@ -1978,7 +1981,7 @@ func (b *BeaconState) MarshalSSZTo(buf []byte) (dst []byte, err error) {
 	offset += len(b.Eth1DataVotes) * 72
 
 	// Field (10) 'Eth1DepositIndex'
-	dst = ssz.MarshalUint64(dst, b.Eth1DepositIndex)
+	dst = ssz.MarshalUint(dst, b.Eth1DepositIndex)
 
 	// Offset (11) 'Validators'
 	dst = ssz.WriteOffset(dst, offset)
@@ -2007,7 +2010,7 @@ func (b *BeaconState) MarshalSSZTo(buf []byte) (dst []byte, err error) {
 		return
 	}
 	for ii := 0; ii < 64; ii++ {
-		dst = ssz.MarshalUint64(dst, b.Slashings[ii])
+		dst = ssz.MarshalUint(dst, b.Slashings[ii])
 	}
 
 	// Offset (15) 'PreviousEpochParticipation'
@@ -2106,7 +2109,7 @@ func (b *BeaconState) MarshalSSZTo(buf []byte) (dst []byte, err error) {
 		return
 	}
 	for ii := 0; ii < len(b.Balances); ii++ {
-		dst = ssz.MarshalUint64(dst, b.Balances[ii])
+		dst = ssz.MarshalUint(dst, b.Balances[ii])
 	}
 
 	// Field (15) 'PreviousEpochParticipation'
@@ -2115,7 +2118,7 @@ func (b *BeaconState) MarshalSSZTo(buf []byte) (dst []byte, err error) {
 		return
 	}
 	for ii := 0; ii < len(b.PreviousEpochParticipation); ii++ {
-		dst = ssz.MarshalUint8(dst, b.PreviousEpochParticipation[ii])
+		dst = ssz.MarshalUint(dst, b.PreviousEpochParticipation[ii])
 	}
 
 	// Field (16) 'CurrentEpochParticipation'
@@ -2124,7 +2127,7 @@ func (b *BeaconState) MarshalSSZTo(buf []byte) (dst []byte, err error) {
 		return
 	}
 	for ii := 0; ii < len(b.CurrentEpochParticipation); ii++ {
-		dst = ssz.MarshalUint8(dst, b.CurrentEpochParticipation[ii])
+		dst = ssz.MarshalUint(dst, b.CurrentEpochParticipation[ii])
 	}
 
 	// Field (21) 'InactivityScores'
@@ -2133,7 +2136,7 @@ func (b *BeaconState) MarshalSSZTo(buf []byte) (dst []byte, err error) {
 		return
 	}
 	for ii := 0; ii < len(b.InactivityScores); ii++ {
-		dst = ssz.MarshalUint64(dst, b.InactivityScores[ii])
+		dst = ssz.MarshalUint(dst, b.InactivityScores[ii])
 	}
 
 	return
@@ -2151,7 +2154,7 @@ func (b *BeaconState) UnmarshalSSZ(buf []byte) error {
 	var o7, o9, o11, o12, o15, o16, o21 uint64
 
 	// Field (0) 'GenesisTime'
-	b.GenesisTime = ssz.UnmarshallUint64(buf[0:8])
+	b.GenesisTime = ssz.UnmarshallUint[uint64](buf[0:8])
 
 	// Field (1) 'GenesisValidatorsRoot'
 	if cap(b.GenesisValidatorsRoot) == 0 {
@@ -2160,7 +2163,7 @@ func (b *BeaconState) UnmarshalSSZ(buf []byte) error {
 	b.GenesisValidatorsRoot = append(b.GenesisValidatorsRoot, buf[8:40]...)
 
 	// Field (2) 'Slot'
-	b.Slot = ssz.UnmarshallUint64(buf[40:48])
+	b.Slot = ssz.UnmarshallUint[uint64](buf[40:48])
 
 	// Field (3) 'Fork'
 	if b.Fork == nil {
@@ -2195,7 +2198,7 @@ func (b *BeaconState) UnmarshalSSZ(buf []byte) error {
 		return ssz.ErrOffset
 	}
 
-	if o7 < 10325 {
+	if o7 != 10325 {
 		return ssz.ErrInvalidVariableOffset
 	}
 
@@ -2213,7 +2216,7 @@ func (b *BeaconState) UnmarshalSSZ(buf []byte) error {
 	}
 
 	// Field (10) 'Eth1DepositIndex'
-	b.Eth1DepositIndex = ssz.UnmarshallUint64(buf[4352:4360])
+	b.Eth1DepositIndex = ssz.UnmarshallUint[uint64](buf[4352:4360])
 
 	// Offset (11) 'Validators'
 	if o11 = ssz.ReadOffset(buf[4360:4364]); o11 > size || o9 > o11 {
@@ -2235,9 +2238,9 @@ func (b *BeaconState) UnmarshalSSZ(buf []byte) error {
 	}
 
 	// Field (14) 'Slashings'
-	b.Slashings = ssz.ExtendUint64(b.Slashings, 64)
+	b.Slashings = ssz.ExtendUint(b.Slashings, 64)
 	for ii := 0; ii < 64; ii++ {
-		b.Slashings[ii] = ssz.UnmarshallUint64(buf[6416:6928][ii*8 : (ii+1)*8])
+		b.Slashings[ii] = ssz.UnmarshallUint[uint64](buf[6416:6928][ii*8 : (ii+1)*8])
 	}
 
 	// Offset (15) 'PreviousEpochParticipation'
@@ -2357,9 +2360,9 @@ func (b *BeaconState) UnmarshalSSZ(buf []byte) error {
 		if err != nil {
 			return err
 		}
-		b.Balances = ssz.ExtendUint64(b.Balances, num)
+		b.Balances = ssz.ExtendUint(b.Balances, num)
 		for ii := 0; ii < num; ii++ {
-			b.Balances[ii] = ssz.UnmarshallUint64(buf[ii*8 : (ii+1)*8])
+			b.Balances[ii] = ssz.UnmarshallUint[uint64](buf[ii*8 : (ii+1)*8])
 		}
 	}
 
@@ -2370,9 +2373,9 @@ func (b *BeaconState) UnmarshalSSZ(buf []byte) error {
 		if err != nil {
 			return err
 		}
-		b.PreviousEpochParticipation = ssz.ExtendUint8(b.PreviousEpochParticipation, num)
+		b.PreviousEpochParticipation = ssz.ExtendUint(b.PreviousEpochParticipation, num)
 		for ii := 0; ii < num; ii++ {
-			b.PreviousEpochParticipation[ii] = ssz.UnmarshallUint8(buf[ii*1 : (ii+1)*1])
+			b.PreviousEpochParticipation[ii] = ssz.UnmarshallUint[uint8](buf[ii*1 : (ii+1)*1])
 		}
 	}
 
@@ -2383,9 +2386,9 @@ func (b *BeaconState) UnmarshalSSZ(buf []byte) error {
 		if err != nil {
 			return err
 		}
-		b.CurrentEpochParticipation = ssz.ExtendUint8(b.CurrentEpochParticipation, num)
+		b.CurrentEpochParticipation = ssz.ExtendUint(b.CurrentEpochParticipation, num)
 		for ii := 0; ii < num; ii++ {
-			b.CurrentEpochParticipation[ii] = ssz.UnmarshallUint8(buf[ii*1 : (ii+1)*1])
+			b.CurrentEpochParticipation[ii] = ssz.UnmarshallUint[uint8](buf[ii*1 : (ii+1)*1])
 		}
 	}
 
@@ -2396,9 +2399,9 @@ func (b *BeaconState) UnmarshalSSZ(buf []byte) error {
 		if err != nil {
 			return err
 		}
-		b.InactivityScores = ssz.ExtendUint64(b.InactivityScores, num)
+		b.InactivityScores = ssz.ExtendUint(b.InactivityScores, num)
 		for ii := 0; ii < num; ii++ {
-			b.InactivityScores[ii] = ssz.UnmarshallUint64(buf[ii*8 : (ii+1)*8])
+			b.InactivityScores[ii] = ssz.UnmarshallUint[uint64](buf[ii*8 : (ii+1)*8])
 		}
 	}
 	return err
@@ -2442,7 +2445,7 @@ func (b *BeaconState) HashTreeRootWith(hh *ssz.Hasher) (err error) {
 	indx := hh.Index()
 
 	// Field (0) 'GenesisTime'
-	hh.PutUint64(b.GenesisTime)
+	ssz.PutUint(hh, b.GenesisTime)
 
 	// Field (1) 'GenesisValidatorsRoot'
 	if size := len(b.GenesisValidatorsRoot); size != 32 {
@@ -2452,7 +2455,7 @@ func (b *BeaconState) HashTreeRootWith(hh *ssz.Hasher) (err error) {
 	hh.PutBytes(b.GenesisValidatorsRoot)
 
 	// Field (2) 'Slot'
-	hh.PutUint64(b.Slot)
+	ssz.PutUint(hh, b.Slot)
 
 	// Field (3) 'Fork'
 	if err = b.Fork.HashTreeRootWith(hh); err != nil {
@@ -2523,7 +2526,7 @@ func (b *BeaconState) HashTreeRootWith(hh *ssz.Hasher) (err error) {
 	}
 
 	// Field (10) 'Eth1DepositIndex'
-	hh.PutUint64(b.Eth1DepositIndex)
+	ssz.PutUint(hh, b.Eth1DepositIndex)
 
 	// Field (11) 'Validators'
 	{
@@ -2549,7 +2552,7 @@ func (b *BeaconState) HashTreeRootWith(hh *ssz.Hasher) (err error) {
 		}
 		subIndx := hh.Index()
 		for _, i := range b.Balances {
-			hh.AppendUint64(i)
+			ssz.AppendUint(hh, i)
 		}
 		hh.FillUpTo32()
 
@@ -2582,7 +2585,7 @@ func (b *BeaconState) HashTreeRootWith(hh *ssz.Hasher) (err error) {
 		}
 		subIndx := hh.Index()
 		for _, i := range b.Slashings {
-			hh.AppendUint64(i)
+			ssz.AppendUint(hh, i)
 		}
 		hh.Merkleize(subIndx)
 	}
@@ -2595,7 +2598,7 @@ func (b *BeaconState) HashTreeRootWith(hh *ssz.Hasher) (err error) {
 		}
 		subIndx := hh.Index()
 		for _, i := range b.PreviousEpochParticipation {
-			hh.AppendUint8(i)
+			ssz.AppendUint(hh, i)
 		}
 		hh.FillUpTo32()
 
@@ -2611,7 +2614,7 @@ func (b *BeaconState) HashTreeRootWith(hh *ssz.Hasher) (err error) {
 		}
 		subIndx := hh.Index()
 		for _, i := range b.CurrentEpochParticipation {
-			hh.AppendUint8(i)
+			ssz.AppendUint(hh, i)
 		}
 		hh.FillUpTo32()
 
@@ -2649,7 +2652,7 @@ func (b *BeaconState) HashTreeRootWith(hh *ssz.Hasher) (err error) {
 		}
 		subIndx := hh.Index()
 		for _, i := range b.InactivityScores {
-			hh.AppendUint64(i)
+			ssz.AppendUint(hh, i)
 		}
 		hh.FillUpTo32()
 
@@ -2682,10 +2685,10 @@ func (b *BeaconBlock) MarshalSSZTo(buf []byte) (dst []byte, err error) {
 	offset := int(84)
 
 	// Field (0) 'Slot'
-	dst = ssz.MarshalUint64(dst, b.Slot)
+	dst = ssz.MarshalUint(dst, b.Slot)
 
 	// Field (1) 'ProposerIndex'
-	dst = ssz.MarshalUint64(dst, b.ProposerIndex)
+	dst = ssz.MarshalUint(dst, b.ProposerIndex)
 
 	// Field (2) 'ParentRoot'
 	if size := len(b.ParentRoot); size != 32 {
@@ -2728,10 +2731,10 @@ func (b *BeaconBlock) UnmarshalSSZ(buf []byte) error {
 	var o4 uint64
 
 	// Field (0) 'Slot'
-	b.Slot = ssz.UnmarshallUint64(buf[0:8])
+	b.Slot = ssz.UnmarshallUint[uint64](buf[0:8])
 
 	// Field (1) 'ProposerIndex'
-	b.ProposerIndex = ssz.UnmarshallUint64(buf[8:16])
+	b.ProposerIndex = ssz.UnmarshallUint[uint64](buf[8:16])
 
 	// Field (2) 'ParentRoot'
 	if cap(b.ParentRoot) == 0 {
@@ -2750,7 +2753,7 @@ func (b *BeaconBlock) UnmarshalSSZ(buf []byte) error {
 		return ssz.ErrOffset
 	}
 
-	if o4 < 84 {
+	if o4 != 84 {
 		return ssz.ErrInvalidVariableOffset
 	}
 
@@ -2790,10 +2793,10 @@ func (b *BeaconBlock) HashTreeRootWith(hh *ssz.Hasher) (err error) {
 	indx := hh.Index()
 
 	// Field (0) 'Slot'
-	hh.PutUint64(b.Slot)
+	ssz.PutUint(hh, b.Slot)
 
 	// Field (1) 'ProposerIndex'
-	hh.PutUint64(b.ProposerIndex)
+	ssz.PutUint(hh, b.ProposerIndex)
 
 	// Field (2) 'ParentRoot'
 	if size := len(b.ParentRoot); size != 32 {
@@ -2866,7 +2869,7 @@ func (s *SignedBeaconBlock) UnmarshalSSZ(buf []byte) error {
 		return ssz.ErrOffset
 	}
 
-	if o0 < 100 {
+	if o0 != 100 {
 		return ssz.ErrInvalidVariableOffset
 	}
 
@@ -2937,19 +2940,19 @@ func (t *Transfer) MarshalSSZTo(buf []byte) (dst []byte, err error) {
 	dst = buf
 
 	// Field (0) 'Sender'
-	dst = ssz.MarshalUint64(dst, t.Sender)
+	dst = ssz.MarshalUint(dst, t.Sender)
 
 	// Field (1) 'Recipient'
-	dst = ssz.MarshalUint64(dst, t.Recipient)
+	dst = ssz.MarshalUint(dst, t.Recipient)
 
 	// Field (2) 'Amount'
-	dst = ssz.MarshalUint64(dst, t.Amount)
+	dst = ssz.MarshalUint(dst, t.Amount)
 
 	// Field (3) 'Fee'
-	dst = ssz.MarshalUint64(dst, t.Fee)
+	dst = ssz.MarshalUint(dst, t.Fee)
 
 	// Field (4) 'Slot'
-	dst = ssz.MarshalUint64(dst, t.Slot)
+	dst = ssz.MarshalUint(dst, t.Slot)
 
 	// Field (5) 'Pubkey'
 	if size := len(t.Pubkey); size != 48 {
@@ -2977,19 +2980,19 @@ func (t *Transfer) UnmarshalSSZ(buf []byte) error {
 	}
 
 	// Field (0) 'Sender'
-	t.Sender = ssz.UnmarshallUint64(buf[0:8])
+	t.Sender = ssz.UnmarshallUint[uint64](buf[0:8])
 
 	// Field (1) 'Recipient'
-	t.Recipient = ssz.UnmarshallUint64(buf[8:16])
+	t.Recipient = ssz.UnmarshallUint[uint64](buf[8:16])
 
 	// Field (2) 'Amount'
-	t.Amount = ssz.UnmarshallUint64(buf[16:24])
+	t.Amount = ssz.UnmarshallUint[uint64](buf[16:24])
 
 	// Field (3) 'Fee'
-	t.Fee = ssz.UnmarshallUint64(buf[24:32])
+	t.Fee = ssz.UnmarshallUint[uint64](buf[24:32])
 
 	// Field (4) 'Slot'
-	t.Slot = ssz.UnmarshallUint64(buf[32:40])
+	t.Slot = ssz.UnmarshallUint[uint64](buf[32:40])
 
 	// Field (5) 'Pubkey'
 	if cap(t.Pubkey) == 0 {
@@ -3022,19 +3025,19 @@ func (t *Transfer) HashTreeRootWith(hh *ssz.Hasher) (err error) {
 	indx := hh.Index()
 
 	// Field (0) 'Sender'
-	hh.PutUint64(t.Sender)
+	ssz.PutUint(hh, t.Sender)
 
 	// Field (1) 'Recipient'
-	hh.PutUint64(t.Recipient)
+	ssz.PutUint(hh, t.Recipient)
 
 	// Field (2) 'Amount'
-	hh.PutUint64(t.Amount)
+	ssz.PutUint(hh, t.Amount)
 
 	// Field (3) 'Fee'
-	hh.PutUint64(t.Fee)
+	ssz.PutUint(hh, t.Fee)
 
 	// Field (4) 'Slot'
-	hh.PutUint64(t.Slot)
+	ssz.PutUint(hh, t.Slot)
 
 	// Field (5) 'Pubkey'
 	if size := len(t.Pubkey); size != 48 {
@@ -3221,7 +3224,7 @@ func (b *BeaconBlockBody) UnmarshalSSZ(buf []byte) error {
 		return ssz.ErrOffset
 	}
 
-	if o3 < 444 {
+	if o3 != 444 {
 		return ssz.ErrInvalidVariableOffset
 	}
 
@@ -3587,10 +3590,10 @@ func (b *BeaconBlockHeader) MarshalSSZTo(buf []byte) (dst []byte, err error) {
 	dst = buf
 
 	// Field (0) 'Slot'
-	dst = ssz.MarshalUint64(dst, b.Slot)
+	dst = ssz.MarshalUint(dst, b.Slot)
 
 	// Field (1) 'ProposerIndex'
-	dst = ssz.MarshalUint64(dst, b.ProposerIndex)
+	dst = ssz.MarshalUint(dst, b.ProposerIndex)
 
 	// Field (2) 'ParentRoot'
 	if size := len(b.ParentRoot); size != 32 {
@@ -3625,10 +3628,10 @@ func (b *BeaconBlockHeader) UnmarshalSSZ(buf []byte) error {
 	}
 
 	// Field (0) 'Slot'
-	b.Slot = ssz.UnmarshallUint64(buf[0:8])
+	b.Slot = ssz.UnmarshallUint[uint64](buf[0:8])
 
 	// Field (1) 'ProposerIndex'
-	b.ProposerIndex = ssz.UnmarshallUint64(buf[8:16])
+	b.ProposerIndex = ssz.UnmarshallUint[uint64](buf[8:16])
 
 	// Field (2) 'ParentRoot'
 	if cap(b.ParentRoot) == 0 {
@@ -3667,10 +3670,10 @@ func (b *BeaconBlockHeader) HashTreeRootWith(hh *ssz.Hasher) (err error) {
 	indx := hh.Index()
 
 	// Field (0) 'Slot'
-	hh.PutUint64(b.Slot)
+	ssz.PutUint(hh, b.Slot)
 
 	// Field (1) 'ProposerIndex'
-	hh.PutUint64(b.ProposerIndex)
+	ssz.PutUint(hh, b.ProposerIndex)
 
 	// Field (2) 'ParentRoot'
 	if size := len(b.ParentRoot); size != 32 {
@@ -3735,7 +3738,7 @@ func (e *ErrorResponse) UnmarshalSSZ(buf []byte) error {
 		return ssz.ErrOffset
 	}
 
-	if o0 < 4 {
+	if o0 != 4 {
 		return ssz.ErrInvalidVariableOffset
 	}
 
@@ -4211,7 +4214,7 @@ func (s *SignedBeaconBlockMinimal) UnmarshalSSZ(buf []byte) error {
 		return ssz.ErrOffset
 	}
 
-	if o0 < 100 {
+	if o0 != 100 {
 		return ssz.ErrInvalidVariableOffset
 	}
 
@@ -4439,7 +4442,7 @@ func (b *BeaconBlockBodyMinimal) UnmarshalSSZ(buf []byte) error {
 		return ssz.ErrOffset
 	}
 
-	if o3 < 320 {
+	if o3 != 320 {
 		return ssz.ErrInvalidVariableOffset
 	}
 
@@ -4723,10 +4726,10 @@ func (b *BeaconBlockMinimal) MarshalSSZTo(buf []byte) (dst []byte, err error) {
 	offset := int(84)
 
 	// Field (0) 'Slot'
-	dst = ssz.MarshalUint64(dst, b.Slot)
+	dst = ssz.MarshalUint(dst, b.Slot)
 
 	// Field (1) 'ProposerIndex'
-	dst = ssz.MarshalUint64(dst, b.ProposerIndex)
+	dst = ssz.MarshalUint(dst, b.ProposerIndex)
 
 	// Field (2) 'ParentRoot'
 	if size := len(b.ParentRoot); size != 32 {
@@ -4769,10 +4772,10 @@ func (b *BeaconBlockMinimal) UnmarshalSSZ(buf []byte) error {
 	var o4 uint64
 
 	// Field (0) 'Slot'
-	b.Slot = ssz.UnmarshallUint64(buf[0:8])
+	b.Slot = ssz.UnmarshallUint[uint64](buf[0:8])
 
 	// Field (1) 'ProposerIndex'
-	b.ProposerIndex = ssz.UnmarshallUint64(buf[8:16])
+	b.ProposerIndex = ssz.UnmarshallUint[uint64](buf[8:16])
 
 	// Field (2) 'ParentRoot'
 	if cap(b.ParentRoot) == 0 {
@@ -4791,7 +4794,7 @@ func (b *BeaconBlockMinimal) UnmarshalSSZ(buf []byte) error {
 		return ssz.ErrOffset
 	}
 
-	if o4 < 84 {
+	if o4 != 84 {
 		return ssz.ErrInvalidVariableOffset
 	}
 
@@ -4831,10 +4834,10 @@ func (b *BeaconBlockMinimal) HashTreeRootWith(hh *ssz.Hasher) (err error) {
 	indx := hh.Index()
 
 	// Field (0) 'Slot'
-	hh.PutUint64(b.Slot)
+	ssz.PutUint(hh, b.Slot)
 
 	// Field (1) 'ProposerIndex'
-	hh.PutUint64(b.ProposerIndex)
+	ssz.PutUint(hh, b.ProposerIndex)
 
 	// Field (2) 'ParentRoot'
 	if size := len(b.ParentRoot); size != 32 {

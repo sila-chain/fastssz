@@ -13,7 +13,7 @@ func (m *Metadata) MarshalSSZTo(buf []byte) (dst []byte, err error) {
 	dst = buf
 
 	// Field (0) 'Version'
-	dst = ssz.MarshalUint8(dst, m.Version)
+	dst = ssz.MarshalUint(dst, m.Version)
 
 	// Field (1) 'CodeHash'
 	if size := len(m.CodeHash); size != 32 {
@@ -23,7 +23,7 @@ func (m *Metadata) MarshalSSZTo(buf []byte) (dst []byte, err error) {
 	dst = append(dst, m.CodeHash...)
 
 	// Field (2) 'CodeLength'
-	dst = ssz.MarshalUint16(dst, m.CodeLength)
+	dst = ssz.MarshalUint(dst, m.CodeLength)
 
 	return
 }
@@ -37,7 +37,7 @@ func (m *Metadata) UnmarshalSSZ(buf []byte) error {
 	}
 
 	// Field (0) 'Version'
-	m.Version = ssz.UnmarshallUint8(buf[0:1])
+	m.Version = ssz.UnmarshallUint[uint8](buf[0:1])
 
 	// Field (1) 'CodeHash'
 	if cap(m.CodeHash) == 0 {
@@ -46,7 +46,7 @@ func (m *Metadata) UnmarshalSSZ(buf []byte) error {
 	m.CodeHash = append(m.CodeHash, buf[1:33]...)
 
 	// Field (2) 'CodeLength'
-	m.CodeLength = ssz.UnmarshallUint16(buf[33:35])
+	m.CodeLength = ssz.UnmarshallUint[uint16](buf[33:35])
 
 	return err
 }
@@ -67,7 +67,7 @@ func (m *Metadata) HashTreeRootWith(hh *ssz.Hasher) (err error) {
 	indx := hh.Index()
 
 	// Field (0) 'Version'
-	hh.PutUint8(m.Version)
+	ssz.PutUint(hh, m.Version)
 
 	// Field (1) 'CodeHash'
 	if size := len(m.CodeHash); size != 32 {
@@ -77,7 +77,7 @@ func (m *Metadata) HashTreeRootWith(hh *ssz.Hasher) (err error) {
 	hh.PutBytes(m.CodeHash)
 
 	// Field (2) 'CodeLength'
-	hh.PutUint16(m.CodeLength)
+	ssz.PutUint(hh, m.CodeLength)
 
 	hh.Merkleize(indx)
 	return
@@ -88,7 +88,7 @@ func (m *Metadata) GetTreeWithWrapper(w *ssz.Wrapper) (err error) {
 	indx := w.Indx()
 
 	// Field (0) 'Version'
-	w.AddUint8(m.Version)
+	ssz.AddUint(w, m.Version)
 
 	// Field (1) 'CodeHash'
 	if len(m.CodeHash) != 32 {
@@ -98,7 +98,7 @@ func (m *Metadata) GetTreeWithWrapper(w *ssz.Wrapper) (err error) {
 	w.AddBytes(m.CodeHash)
 
 	// Field (2) 'CodeLength'
-	w.AddUint16(m.CodeLength)
+	ssz.AddUint(w, m.CodeLength)
 
 	for i := 0; i < 1; i++ {
 		w.AddEmpty()
@@ -126,7 +126,7 @@ func (c *Chunk) MarshalSSZTo(buf []byte) (dst []byte, err error) {
 	dst = buf
 
 	// Field (0) 'FIO'
-	dst = ssz.MarshalUint8(dst, c.FIO)
+	dst = ssz.MarshalUint(dst, c.FIO)
 
 	// Field (1) 'Code'
 	if size := len(c.Code); size != 32 {
@@ -147,7 +147,7 @@ func (c *Chunk) UnmarshalSSZ(buf []byte) error {
 	}
 
 	// Field (0) 'FIO'
-	c.FIO = ssz.UnmarshallUint8(buf[0:1])
+	c.FIO = ssz.UnmarshallUint[uint8](buf[0:1])
 
 	// Field (1) 'Code'
 	if cap(c.Code) == 0 {
@@ -174,7 +174,7 @@ func (c *Chunk) HashTreeRootWith(hh *ssz.Hasher) (err error) {
 	indx := hh.Index()
 
 	// Field (0) 'FIO'
-	hh.PutUint8(c.FIO)
+	ssz.PutUint(hh, c.FIO)
 
 	// Field (1) 'Code'
 	if size := len(c.Code); size != 32 {
@@ -192,7 +192,7 @@ func (c *Chunk) GetTreeWithWrapper(w *ssz.Wrapper) (err error) {
 	indx := w.Indx()
 
 	// Field (0) 'FIO'
-	w.AddUint8(c.FIO)
+	ssz.AddUint(w, c.FIO)
 
 	// Field (1) 'Code'
 	if len(c.Code) != 32 {

@@ -1,6 +1,9 @@
 package ssz
 
 import (
+	"go/ast"
+	"go/parser"
+	"go/token"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -8,6 +11,8 @@ import (
 	"strings"
 	"testing"
 )
+
+type aliasedUint64 uint64
 
 func TestBitlist(t *testing.T) {
 	res := []string{}
@@ -92,5 +97,131 @@ func TestBitlist_MaxValue(t *testing.T) {
 				t.Error("Invalid bitlist did not fail validation")
 			}
 		})
+	}
+}
+
+func TestExtendUint(t *testing.T) {
+	t.Run("uint64 alias", func(t *testing.T) {
+		type aliasedUint64 = uint64
+
+		buf := []aliasedUint64{4}
+		got := ExtendUint(buf, 2)
+
+		if len(got) != 2 {
+			t.Fatalf("expected len 2, got %d", len(got))
+		}
+		if got[0] != 4 || got[1] != 0 {
+			t.Fatalf("unexpected result: %v", got)
+		}
+	})
+
+	t.Run("uint8", func(t *testing.T) {
+		buf := make([]uint8, 2, 4)
+		buf[0] = 1
+		buf[1] = 2
+
+		base := &buf[:cap(buf)][0]
+		got := ExtendUint(buf, 4)
+
+		if len(got) != 4 {
+			t.Fatalf("expected len 4, got %d", len(got))
+		}
+		if cap(got) != 4 {
+			t.Fatalf("expected cap 4, got %d", cap(got))
+		}
+		if &got[0] != base {
+			t.Fatal("expected ExtendUint to reuse backing array")
+		}
+		if got[0] != 1 || got[1] != 2 || got[2] != 0 || got[3] != 0 {
+			t.Fatalf("unexpected result: %v", got)
+		}
+	})
+
+	t.Run("uint16", func(t *testing.T) {
+		buf := []uint16{3}
+
+		got := ExtendUint(buf, 3)
+
+		if len(got) != 3 {
+			t.Fatalf("expected len 3, got %d", len(got))
+		}
+		if got[0] != 3 || got[1] != 0 || got[2] != 0 {
+			t.Fatalf("unexpected result: %v", got)
+		}
+	})
+
+	t.Run("uint64", func(t *testing.T) {
+		buf := make([]uint64, 1)
+		buf[0] = 9
+
+		got := ExtendUint(buf, 2)
+
+		if len(got) != 2 {
+			t.Fatalf("expected len 2, got %d", len(got))
+		}
+		if got[0] != 9 || got[1] != 0 {
+			t.Fatalf("unexpected result: %v", got)
+		}
+	})
+
+	t.Run("shrink", func(t *testing.T) {
+		buf := []uint16{5, 6, 7}
+
+		got := ExtendUint(buf, 2)
+
+		if len(got) != 2 {
+			t.Fatalf("expected len 2, got %d", len(got))
+		}
+		if got[0] != 5 || got[1] != 6 {
+			t.Fatalf("unexpected result: %v", got)
+		}
+	})
+}
+
+func TestUnmarshallUintAcceptsNamedUint64(t *testing.T) {
+	got := UnmarshallUint[aliasedUint64]([]byte{9, 0, 0, 0, 0, 0, 0, 0})
+	if got != 9 {
+		t.Fatalf("unexpected result: %v", got)
+	}
+}
+
+func TestDeprecatedUnmarshallWrappersCallUnmarshallUint(t *testing.T) {
+	fset := token.NewFileSet()
+	file, err := parser.ParseFile(fset, "decode.go", nil, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, name := range []string{"UnmarshallUint64", "UnmarshallUint32", "UnmarshallUint16", "UnmarshallUint8"} {
+		found := false
+		for _, decl := range file.Decls {
+			fn, ok := decl.(*ast.FuncDecl)
+			if !ok || fn.Name.Name != name {
+				continue
+			}
+			found = true
+			if len(fn.Body.List) != 1 {
+				t.Fatalf("expected %s to have exactly one statement", name)
+			}
+			ret, ok := fn.Body.List[0].(*ast.ReturnStmt)
+			if !ok || len(ret.Results) != 1 {
+				t.Fatalf("expected %s to return a direct call", name)
+			}
+			call, ok := ret.Results[0].(*ast.CallExpr)
+			if !ok {
+				t.Fatalf("expected %s to return a call", name)
+			}
+			ident, ok := call.Fun.(*ast.IndexExpr)
+			if !ok {
+				t.Fatalf("expected %s to call generic UnmarshallUint", name)
+			}
+			fun, ok := ident.X.(*ast.Ident)
+			if !ok || fun.Name != "UnmarshallUint" {
+				t.Fatalf("expected %s to call UnmarshallUint", name)
+			}
+		}
+		if !found {
+			t.Fatalf("did not find %s", name)
+		}
 	}
 }

@@ -3,6 +3,7 @@ package ssz
 import (
 	"encoding/binary"
 	"fmt"
+	"unsafe"
 )
 
 // MarshalSSZ marshals an object
@@ -33,25 +34,52 @@ func ErrListTooBigFn(name string, found, max int) error {
 	return fmt.Errorf("%s (%v): max expected %d and %d found", name, ErrListTooBig, max, found)
 }
 
-// MarshalUint64 marshals a little endian uint64 to dst
+type marshalUints interface {
+	~uint8 | ~uint16 | ~uint32 | ~uint64
+}
+
+// MarshalUint marshals a little endian uint8, uint16, uint32, or uint64 to dst.
+func MarshalUint[T marshalUints](dst []byte, i T) []byte {
+	switch unsafe.Sizeof(i) {
+	case 1:
+		return append(dst, byte(i))
+	case 2:
+		return binary.LittleEndian.AppendUint16(dst, uint16(i))
+	case 4:
+		return binary.LittleEndian.AppendUint32(dst, uint32(i))
+	case 8:
+		return binary.LittleEndian.AppendUint64(dst, uint64(i))
+	default:
+		panic("unsupported uint size")
+	}
+}
+
+// MarshalUint64 marshals a little endian uint64 to dst.
+//
+// Deprecated: use MarshalUint instead.
 func MarshalUint64(dst []byte, i uint64) []byte {
-	return binary.LittleEndian.AppendUint64(dst, i)
+	return MarshalUint(dst, i)
 }
 
-// MarshalUint32 marshals a little endian uint32 to dst
+// MarshalUint32 marshals a little endian uint32 to dst.
+//
+// Deprecated: use MarshalUint instead.
 func MarshalUint32(dst []byte, i uint32) []byte {
-	return binary.LittleEndian.AppendUint32(dst, i)
+	return MarshalUint(dst, i)
 }
 
-// MarshalUint16 marshals a little endian uint16 to dst
+// MarshalUint16 marshals a little endian uint16 to dst.
+//
+// Deprecated: use MarshalUint instead.
 func MarshalUint16(dst []byte, i uint16) []byte {
-	return binary.LittleEndian.AppendUint16(dst, i)
+	return MarshalUint(dst, i)
 }
 
-// MarshalUint8 marshals a little endian uint8 to dst
+// MarshalUint8 marshals a little endian uint8 to dst.
+//
+// Deprecated: use MarshalUint instead.
 func MarshalUint8(dst []byte, i uint8) []byte {
-	dst = append(dst, byte(i))
-	return dst
+	return MarshalUint(dst, i)
 }
 
 // MarshalBool marshals a boolean to dst
@@ -64,5 +92,5 @@ func MarshalBool(dst []byte, b bool) []byte {
 
 // WriteOffset writes an offset to dst
 func WriteOffset(dst []byte, i int) []byte {
-	return MarshalUint32(dst, uint32(i))
+	return MarshalUint(dst, uint32(i))
 }

@@ -1,7 +1,6 @@
 package ssz
 
 import (
-	"encoding/binary"
 	"errors"
 	"fmt"
 	"hash"
@@ -121,30 +120,37 @@ func (h *Hasher) AppendBytes32(b []byte) {
 	}
 }
 
-// PutUint64 appends a uint64 in 32 bytes
+// PutUint appends a uint8, uint16, uint32, or uint64 in 32 bytes.
+func PutUint[T appendUints](h *Hasher, i T) {
+	h.AppendBytes32(MarshalUint(nil, i))
+}
+
+// PutUint64 appends a uint64 in 32 bytes.
+//
+// Deprecated: use PutUint instead.
 func (h *Hasher) PutUint64(i uint64) {
-	buf := make([]byte, 8)
-	binary.LittleEndian.PutUint64(buf, i)
-	h.AppendBytes32(buf)
+	PutUint(h, i)
 }
 
-// PutUint32 appends a uint32 in 32 bytes
+// PutUint32 appends a uint32 in 32 bytes.
+//
+// Deprecated: use PutUint instead.
 func (h *Hasher) PutUint32(i uint32) {
-	buf := make([]byte, 4)
-	binary.LittleEndian.PutUint32(buf, i)
-	h.AppendBytes32(buf)
+	PutUint(h, i)
 }
 
-// PutUint16 appends a uint16 in 32 bytes
+// PutUint16 appends a uint16 in 32 bytes.
+//
+// Deprecated: use PutUint instead.
 func (h *Hasher) PutUint16(i uint16) {
-	buf := make([]byte, 2)
-	binary.LittleEndian.PutUint16(buf, i)
-	h.AppendBytes32(buf)
+	PutUint(h, i)
 }
 
-// PutUint16 appends a uint16 in 32 bytes
+// PutUint8 appends a uint8 in 32 bytes.
+//
+// Deprecated: use PutUint instead.
 func (h *Hasher) PutUint8(i uint8) {
-	h.AppendBytes32([]byte{byte(i)})
+	PutUint(h, i)
 }
 
 func CalculateLimit(maxCapacity, numItems, size uint64) uint64 {
@@ -165,12 +171,27 @@ func (h *Hasher) FillUpTo32() {
 	}
 }
 
-func (h *Hasher) AppendUint8(i uint8) {
-	h.buf = MarshalUint8(h.buf, i)
+type appendUints interface {
+	~uint8 | ~uint16 | ~uint32 | ~uint64
 }
 
+// AppendUint appends a uint8, uint16, uint32, or uint64 value without 32-byte padding.
+func AppendUint[T appendUints](h *Hasher, i T) {
+	h.buf = MarshalUint(h.buf, i)
+}
+
+// AppendUint8 appends a uint8 without 32-byte padding.
+//
+// Deprecated: use AppendUint instead.
+func (h *Hasher) AppendUint8(i uint8) {
+	AppendUint(h, i)
+}
+
+// AppendUint64 appends a uint64 without 32-byte padding.
+//
+// Deprecated: use AppendUint instead.
 func (h *Hasher) AppendUint64(i uint64) {
-	h.buf = MarshalUint64(h.buf, i)
+	AppendUint(h, i)
 }
 
 func (h *Hasher) Append(i []byte) {
@@ -202,7 +223,7 @@ func (h *Hasher) PutRootVector(b [][]byte, maxCapacity ...uint64) error {
 func (h *Hasher) PutUint64Array(b []uint64, maxCapacity ...uint64) {
 	indx := h.Index()
 	for _, i := range b {
-		h.AppendUint64(i)
+		h.buf = MarshalUint(h.buf, i)
 	}
 
 	// pad zero bytes to the left
@@ -289,7 +310,7 @@ func (h *Hasher) MerkleizeWithMixin(indx int, num, limit uint64) {
 	for indx := range sizemix {
 		sizemix[indx] = 0
 	}
-	MarshalUint64(sizemix[:0], num)
+	MarshalUint(sizemix[:0], num)
 	h.buf = append(h.buf[:indx], h.doHash(input, input, sizemix)...)
 }
 

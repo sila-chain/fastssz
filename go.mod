@@ -1,6 +1,6 @@
 module github.com/prysmaticlabs/fastssz
 
-go 1.18
+go 1.19
 
 require (
 	github.com/golang/snappy v0.0.3

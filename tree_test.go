@@ -3,8 +3,13 @@ package ssz
 import (
 	"bytes"
 	"encoding/hex"
+	"go/ast"
+	"go/parser"
+	"go/token"
 	"testing"
 )
+
+type treeSlot uint64
 
 func TestTreeFromChunks(t *testing.T) {
 	chunks := [][]byte{
@@ -132,4 +137,82 @@ func TestGetRequiredIndices(t *testing.T) {
 			t.Errorf("Invalid required index. Expected %d, got %d\n", expected[i], r)
 		}
 	}
+}
+
+func TestLeafFromUintAcceptsNamedUint64(t *testing.T) {
+	leaf := LeafFromUint(treeSlot(7))
+	want := make([]byte, 32)
+	want[0] = 7
+	if !bytes.Equal(leaf.value, want) {
+		t.Fatalf("unexpected leaf value: %v", leaf.value)
+	}
+}
+
+func TestDeprecatedLeafWrappersCallLeafFromUint(t *testing.T) {
+	fset := token.NewFileSet()
+	file, err := parser.ParseFile(fset, "tree.go", nil, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, name := range []string{"LeafFromUint64", "LeafFromUint32", "LeafFromUint16", "LeafFromUint8"} {
+		found := false
+		for _, decl := range file.Decls {
+			fn, ok := decl.(*ast.FuncDecl)
+			if !ok || fn.Name.Name != name {
+				continue
+			}
+			found = true
+			if len(fn.Body.List) != 1 {
+				t.Fatalf("expected %s to have exactly one statement", name)
+			}
+			ret, ok := fn.Body.List[0].(*ast.ReturnStmt)
+			if !ok || len(ret.Results) != 1 {
+				t.Fatalf("expected %s to return a direct call", name)
+			}
+			call, ok := ret.Results[0].(*ast.CallExpr)
+			if !ok {
+				t.Fatalf("expected %s to return a call", name)
+			}
+			ident, ok := call.Fun.(*ast.Ident)
+			if !ok || ident.Name != "LeafFromUint" {
+				t.Fatalf("expected %s to call LeafFromUint", name)
+			}
+		}
+		if !found {
+			t.Fatalf("did not find %s", name)
+		}
+	}
+}
+
+func TestTreeInternalsUseGenericUintHelpers(t *testing.T) {
+	fset := token.NewFileSet()
+	file, err := parser.ParseFile(fset, "tree.go", nil, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, decl := range file.Decls {
+		fn, ok := decl.(*ast.FuncDecl)
+		if !ok || fn.Name.Name != "TreeFromNodesWithMixin" {
+			continue
+		}
+		callsLeafFromUint := false
+		ast.Inspect(fn.Body, func(n ast.Node) bool {
+			call, ok := n.(*ast.CallExpr)
+			if !ok {
+				return true
+			}
+			ident, ok := call.Fun.(*ast.Ident)
+			if ok && ident.Name == "LeafFromUint" {
+				callsLeafFromUint = true
+			}
+			return true
+		})
+		if !callsLeafFromUint {
+			t.Fatal("expected TreeFromNodesWithMixin to use LeafFromUint")
+		}
+		return
+	}
+	t.Fatal("did not find TreeFromNodesWithMixin")
 }

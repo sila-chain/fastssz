@@ -1,11 +1,10 @@
-package main
+package generator
 
 import (
 	"fmt"
 	"strings"
 )
 
-// getTree creates a function that SSZ hashes the structs,
 func (e *env) getTree(name string, v *Value) string {
 	tmpl := `// GetTree returns tree-backing for the {{.name}} object
 	func (:: *{{.name}}) GetTreeWithWrapper(w *ssz.Wrapper) (err error) {
@@ -34,26 +33,22 @@ func (v *Value) getTrees(isList bool, elem Type) string {
 		panic("unimplemented")
 	}
 
-	var merkleize string
-	subLeavesTmpl := `subLeaves := ssz.LeavesFromUint64(::.{{.name}})`
-	subLeaves := execTmpl(subLeavesTmpl, map[string]interface{}{
+	subLeaves := execTmpl(`subLeaves := ssz.LeavesFromUint64(::.{{.name}})`, map[string]interface{}{
 		"name": v.name,
 	})
 
+	merkleize := "tmp = ssz.TreeFromNodes(subLeaves)"
 	if isList {
 		tmpl := `numItems := len(::.{{.name}})
 		tmp, err = ssz.TreeFromNodesWithMixin(subLeaves, numItems, int(ssz.CalculateLimit({{.listSize}}, uint64(numItems), {{.elemSize}})))
 		if err != nil {
 			return nil, err
 		}`
-
 		merkleize = execTmpl(tmpl, map[string]interface{}{
 			"name":     v.name,
 			"listSize": v.s,
 			"elemSize": 8,
 		})
-	} else {
-		merkleize = "tmp = ssz.TreeFromNodes(subLeaves)"
 	}
 
 	tmpl := `{
@@ -70,38 +65,27 @@ func (v *Value) getTree() string {
 	switch v.t {
 	case TypeContainer, TypeReference:
 		return v.getTreeContainer(false)
-
 	case TypeBytes:
-		// There are only fixed []byte
 		name := v.name
 		if v.c {
 			name += "[:]"
 		}
-
 		tmpl := `{{.validate}}w.AddBytes(::.{{.name}})`
 		return execTmpl(tmpl, map[string]interface{}{
 			"validate": v.validate(),
 			"name":     name,
-			"size":     v.s,
 		})
-
 	case TypeUint:
 		return fmt.Sprintf("ssz.AddUint(w, ::.%s)", v.name)
-
 	case TypeBitList:
 		panic("unimplemented")
-
 	case TypeBool:
 		return fmt.Sprintf("tmp = ssz.LeafFromBool(::.%s)", v.name)
-
 	case TypeVector:
 		return v.getTrees(false, v.e.t)
-
 	case TypeList:
-		if v.e.isFixed() {
-			if v.e.t == TypeUint || v.e.t == TypeBytes {
-				return v.getTrees(true, v.e.t)
-			}
+		if v.e.isFixed() && (v.e.t == TypeUint || v.e.t == TypeBytes) {
+			return v.getTrees(true, v.e.t)
 		}
 		tmpl := `{
 			subIdx := w.Indx()
@@ -123,7 +107,6 @@ func (v *Value) getTree() string {
 			"name": v.name,
 			"num":  v.m,
 		})
-
 	default:
 		panic(fmt.Errorf("hash not implemented for type %s", v.t.String()))
 	}
@@ -137,11 +120,9 @@ func (v *Value) getTreeContainer(start bool) string {
 	numLeaves := nextPowerOfTwo(uint64(len(v.o)))
 	out := []string{}
 	for indx, i := range v.o {
-		str := fmt.Sprintf("// Field (%d) '%s'\n%s\n", indx, i.name, i.getTree())
-		out = append(out, str)
+		out = append(out, fmt.Sprintf("// Field (%d) '%s'\n%s\n", indx, i.name, i.getTree()))
 	}
 
-	// Empty leaves
 	emptyLeaves := ""
 	if numLeaves-uint(len(v.o)) > 0 {
 		emptyLeaves = fmt.Sprintf("for i := 0; i < %d; i++ {\nw.AddEmpty()\n}", numLeaves-uint(len(v.o)))
@@ -155,7 +136,6 @@ func (v *Value) getTreeContainer(start bool) string {
 	w.Commit(indx)`
 
 	return execTmpl(tmpl, map[string]interface{}{
-		"numLeaves":   numLeaves,
 		"fields":      strings.Join(out, "\n"),
 		"emptyLeaves": emptyLeaves,
 	})
