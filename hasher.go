@@ -190,14 +190,14 @@ func AppendUint[T appendUints](h *Hasher, i T) {
 //
 // Deprecated: use AppendUint instead.
 func (h *Hasher) AppendUint8(i uint8) {
-	h.buf = MarshalUint8(h.buf, i)
+	AppendUint(h, i)
 }
 
 // AppendUint64 appends a uint64 without 32-byte padding.
 //
 // Deprecated: use AppendUint instead.
 func (h *Hasher) AppendUint64(i uint64) {
-	h.buf = MarshalUint64(h.buf, i)
+	AppendUint(h, i)
 }
 
 func (h *Hasher) Append(i []byte) {
