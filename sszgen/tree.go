@@ -86,16 +86,7 @@ func (v *Value) getTree() string {
 		})
 
 	case TypeUint:
-		var name string
-		if v.ref != "" || v.obj != "" {
-			// alias to Uint64
-			name = fmt.Sprintf("uint64(::.%s)", v.name)
-		} else {
-			name = "::." + v.name
-		}
-
-		method := uintVToName(v)
-		return fmt.Sprintf("w.Add%s(%s)", method, name)
+		return fmt.Sprintf("ssz.AddUint(w, ::.%s)", v.name)
 
 	case TypeBitList:
 		panic("unimplemented")

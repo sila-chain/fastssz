@@ -88,7 +88,7 @@ func (m *Metadata) GetTreeWithWrapper(w *ssz.Wrapper) (err error) {
 	indx := w.Indx()
 
 	// Field (0) 'Version'
-	w.AddUint8(m.Version)
+	ssz.AddUint(w, m.Version)
 
 	// Field (1) 'CodeHash'
 	if len(m.CodeHash) != 32 {
@@ -98,7 +98,7 @@ func (m *Metadata) GetTreeWithWrapper(w *ssz.Wrapper) (err error) {
 	w.AddBytes(m.CodeHash)
 
 	// Field (2) 'CodeLength'
-	w.AddUint16(m.CodeLength)
+	ssz.AddUint(w, m.CodeLength)
 
 	for i := 0; i < 1; i++ {
 		w.AddEmpty()
@@ -192,7 +192,7 @@ func (c *Chunk) GetTreeWithWrapper(w *ssz.Wrapper) (err error) {
 	indx := w.Indx()
 
 	// Field (0) 'FIO'
-	w.AddUint8(c.FIO)
+	ssz.AddUint(w, c.FIO)
 
 	// Field (1) 'Code'
 	if len(c.Code) != 32 {
