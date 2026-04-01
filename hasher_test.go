@@ -136,3 +136,35 @@ func TestDeprecatedPutWrappersCallPutUint(t *testing.T) {
 		}
 	}
 }
+
+func TestAppendUintUsesMarshalUintInternally(t *testing.T) {
+	fset := token.NewFileSet()
+	file, err := parser.ParseFile(fset, "hasher.go", nil, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, decl := range file.Decls {
+		fn, ok := decl.(*ast.FuncDecl)
+		if !ok || fn.Name.Name != "AppendUint" {
+			continue
+		}
+		callsMarshalUint := false
+		ast.Inspect(fn.Body, func(n ast.Node) bool {
+			call, ok := n.(*ast.CallExpr)
+			if !ok {
+				return true
+			}
+			ident, ok := call.Fun.(*ast.Ident)
+			if ok && ident.Name == "MarshalUint" {
+				callsMarshalUint = true
+			}
+			return true
+		})
+		if !callsMarshalUint {
+			t.Fatal("expected AppendUint to use MarshalUint internally")
+		}
+		return
+	}
+	t.Fatal("did not find AppendUint")
+}

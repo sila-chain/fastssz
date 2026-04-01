@@ -92,5 +92,5 @@ func MarshalBool(dst []byte, b bool) []byte {
 
 // WriteOffset writes an offset to dst
 func WriteOffset(dst []byte, i int) []byte {
-	return MarshalUint32(dst, uint32(i))
+	return MarshalUint(dst, uint32(i))
 }

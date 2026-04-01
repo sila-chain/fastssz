@@ -184,3 +184,35 @@ func TestDeprecatedLeafWrappersCallLeafFromUint(t *testing.T) {
 		}
 	}
 }
+
+func TestTreeInternalsUseGenericUintHelpers(t *testing.T) {
+	fset := token.NewFileSet()
+	file, err := parser.ParseFile(fset, "tree.go", nil, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, decl := range file.Decls {
+		fn, ok := decl.(*ast.FuncDecl)
+		if !ok || fn.Name.Name != "TreeFromNodesWithMixin" {
+			continue
+		}
+		callsLeafFromUint := false
+		ast.Inspect(fn.Body, func(n ast.Node) bool {
+			call, ok := n.(*ast.CallExpr)
+			if !ok {
+				return true
+			}
+			ident, ok := call.Fun.(*ast.Ident)
+			if ok && ident.Name == "LeafFromUint" {
+				callsLeafFromUint = true
+			}
+			return true
+		})
+		if !callsLeafFromUint {
+			t.Fatal("expected TreeFromNodesWithMixin to use LeafFromUint")
+		}
+		return
+	}
+	t.Fatal("did not find TreeFromNodesWithMixin")
+}

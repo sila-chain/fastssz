@@ -6,7 +6,6 @@ import (
 	"hash"
 	"math/bits"
 	"sync"
-	"unsafe"
 
 	"github.com/minio/sha256-simd"
 	"github.com/prysmaticlabs/gohashtree"
@@ -178,18 +177,7 @@ type appendUints interface {
 
 // AppendUint appends a uint8, uint16, uint32, or uint64 value without 32-byte padding.
 func AppendUint[T appendUints](h *Hasher, i T) {
-	switch unsafe.Sizeof(i) {
-	case 1:
-		h.buf = MarshalUint8(h.buf, uint8(i))
-	case 2:
-		h.buf = MarshalUint16(h.buf, uint16(i))
-	case 4:
-		h.buf = MarshalUint32(h.buf, uint32(i))
-	case 8:
-		h.buf = MarshalUint64(h.buf, uint64(i))
-	default:
-		panic("unsupported uint size")
-	}
+	h.buf = MarshalUint(h.buf, i)
 }
 
 // AppendUint8 appends a uint8 without 32-byte padding.
@@ -235,7 +223,7 @@ func (h *Hasher) PutRootVector(b [][]byte, maxCapacity ...uint64) error {
 func (h *Hasher) PutUint64Array(b []uint64, maxCapacity ...uint64) {
 	indx := h.Index()
 	for _, i := range b {
-		h.buf = MarshalUint64(h.buf, i)
+		h.buf = MarshalUint(h.buf, i)
 	}
 
 	// pad zero bytes to the left
@@ -322,7 +310,7 @@ func (h *Hasher) MerkleizeWithMixin(indx int, num, limit uint64) {
 	for indx := range sizemix {
 		sizemix[indx] = 0
 	}
-	MarshalUint64(sizemix[:0], num)
+	MarshalUint(sizemix[:0], num)
 	h.buf = append(h.buf[:indx], h.doHash(input, input, sizemix)...)
 }
 

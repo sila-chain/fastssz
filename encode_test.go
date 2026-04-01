@@ -54,3 +54,32 @@ func TestDeprecatedMarshalWrappersCallMarshalUint(t *testing.T) {
 		}
 	}
 }
+
+func TestWriteOffsetUsesMarshalUint(t *testing.T) {
+	fset := token.NewFileSet()
+	file, err := parser.ParseFile(fset, "encode.go", nil, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, decl := range file.Decls {
+		fn, ok := decl.(*ast.FuncDecl)
+		if !ok || fn.Name.Name != "WriteOffset" {
+			continue
+		}
+		ret, ok := fn.Body.List[0].(*ast.ReturnStmt)
+		if !ok || len(ret.Results) != 1 {
+			t.Fatal("expected WriteOffset to return a direct call")
+		}
+		call, ok := ret.Results[0].(*ast.CallExpr)
+		if !ok {
+			t.Fatal("expected WriteOffset to return a call")
+		}
+		ident, ok := call.Fun.(*ast.Ident)
+		if !ok || ident.Name != "MarshalUint" {
+			t.Fatal("expected WriteOffset to call MarshalUint")
+		}
+		return
+	}
+	t.Fatal("did not find WriteOffset")
+}

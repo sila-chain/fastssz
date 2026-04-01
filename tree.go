@@ -161,7 +161,7 @@ func TreeFromNodesWithMixin(leaves []*Node, num, limit int) (*Node, error) {
 	}
 
 	// Mixin len
-	countLeaf := LeafFromUint64(uint64(num))
+	countLeaf := LeafFromUint(uint64(num))
 	return NewNodeWithLR(mainTree, countLeaf), nil
 }
 
