@@ -121,6 +121,7 @@ func (v *Value) hashRoots(isList bool, elem Type) string {
 // the length of the list needs to be mixed in as part of the merkleization process, which happens in a separate
 // call to MerkleizeWithMixin.
 func (v *Value) hashTreeRoot(name string, appendBytes bool) string {
+	_ = appendBytes
 	if name == "" {
 		name = "::." + v.name
 	}
@@ -141,10 +142,6 @@ func (v *Value) hashTreeRoot(name string, appendBytes bool) string {
 			})
 		} else {
 			// dynamic bytes require special handling, need length mixed in
-			hMethod := "PutBytes"
-			if appendBytes {
-				hMethod = "AppendBytes32"
-			}
 			tmpl := `{
 	elemIndx := hh.Index()
 	byteLen := uint64(len({{.name}}))
@@ -152,13 +149,12 @@ func (v *Value) hashTreeRoot(name string, appendBytes bool) string {
 		err = ssz.ErrIncorrectListSize
 		return
     }
-	hh.{{.hashMethod}}({{.name}})
+	hh.AppendBytes32({{.name}})
 	hh.MerkleizeWithMixin(elemIndx, byteLen, ({{.maxLen}}+31)/32)
 }`
 			return execTmpl(tmpl, map[string]interface{}{
-				"hashMethod": hMethod,
-				"name":       name,
-				"maxLen":     v.m,
+				"name":   name,
+				"maxLen": v.m,
 			})
 		}
 

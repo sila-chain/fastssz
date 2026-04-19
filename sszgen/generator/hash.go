@@ -109,10 +109,9 @@ func (v *Value) hashTreeRoot(name string, appendBytes bool) string {
 				"name":     name,
 			})
 		}
-		hMethod := "PutBytes"
-		if appendBytes {
-			hMethod = "AppendBytes32"
-		}
+		// PutBytes auto-merkleizes when len > 32, which double-hashes against
+		// MerkleizeWithMixin below and yields the wrong root.
+		_ = appendBytes
 		tmpl := `{
 	elemIndx := hh.Index()
 	byteLen := uint64(len({{.name}}))
@@ -120,13 +119,12 @@ func (v *Value) hashTreeRoot(name string, appendBytes bool) string {
 		err = ssz.ErrIncorrectListSize
 		return
     }
-	hh.{{.hashMethod}}({{.name}})
+	hh.AppendBytes32({{.name}})
 	hh.MerkleizeWithMixin(elemIndx, byteLen, ({{.maxLen}}+31)/32)
 }`
 		return execTmpl(tmpl, map[string]interface{}{
-			"hashMethod": hMethod,
-			"name":       name,
-			"maxLen":     v.m,
+			"name":   name,
+			"maxLen": v.m,
 		})
 	case TypeUint:
 		return fmt.Sprintf("ssz.PutUint(hh, %s)", name)
