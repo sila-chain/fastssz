@@ -207,6 +207,10 @@ type ErrorResponse struct {
 	Message external.DynamicBytes `ssz-max:"256"`
 }
 
+type ByteListContainer struct {
+	Data []byte `ssz-max:"256"`
+}
+
 type Dummy struct {
 }
 
