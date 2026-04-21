@@ -120,8 +120,7 @@ func (v *Value) hashRoots(isList bool, elem Type) string {
 // with padding and leaves the merkleization for a following step. This is because in the case of ByteLists,
 // the length of the list needs to be mixed in as part of the merkleization process, which happens in a separate
 // call to MerkleizeWithMixin.
-func (v *Value) hashTreeRoot(name string, appendBytes bool) string {
-	_ = appendBytes
+func (v *Value) hashTreeRoot(name string) string {
 	if name == "" {
 		name = "::." + v.name
 	}
@@ -217,7 +216,7 @@ func (v *Value) hashTreeRoot(name string, appendBytes bool) string {
 		if v.e.t == TypeBytes {
 			eName := "elem"
 			// ByteLists should be represented as Value with TypeBytes and .m set instead of .s (isFixed == true)
-			htrCall = v.e.hashTreeRoot(eName, true)
+			htrCall = v.e.hashTreeRoot(eName)
 		} else {
 			htrCall = execTmpl(`if err = elem.HashTreeRootWith(hh); err != nil {
 	return
@@ -248,7 +247,7 @@ func (v *Value) hashTreeRootContainer(start bool) string {
 		// is empty, it defaults to the .name parameter of the value
 		// the second field tells the code generator to specifically generate a call to AppendBytes32
 		// this is used by List[List[byte, N]] so that lists of lists of bytes are not double-merkleized.
-		str := fmt.Sprintf("// Field (%d) '%s'\n%s\n", indx, i.name, i.hashTreeRoot("", false))
+		str := fmt.Sprintf("// Field (%d) '%s'\n%s\n", indx, i.name, i.hashTreeRoot(""))
 		out = append(out, str)
 	}
 

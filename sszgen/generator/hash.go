@@ -91,7 +91,7 @@ func (v *Value) hashRoots(isList bool, elem Type) string {
 	})
 }
 
-func (v *Value) hashTreeRoot(name string, appendBytes bool) string {
+func (v *Value) hashTreeRoot(name string) string {
 	if name == "" {
 		name = "::." + v.name
 	}
@@ -109,9 +109,6 @@ func (v *Value) hashTreeRoot(name string, appendBytes bool) string {
 				"name":     name,
 			})
 		}
-		// PutBytes auto-merkleizes when len > 32, which double-hashes against
-		// MerkleizeWithMixin below and yields the wrong root.
-		_ = appendBytes
 		tmpl := `{
 	elemIndx := hh.Index()
 	byteLen := uint64(len({{.name}}))
@@ -175,7 +172,7 @@ func (v *Value) hashTreeRoot(name string, appendBytes bool) string {
 		}`
 		htrCall := ""
 		if v.e.t == TypeBytes {
-			htrCall = v.e.hashTreeRoot("elem", true)
+			htrCall = v.e.hashTreeRoot("elem")
 		} else {
 			htrCall = execTmpl(`if err = elem.HashTreeRootWith(hh); err != nil {
 	return
@@ -199,7 +196,7 @@ func (v *Value) hashTreeRootContainer(start bool) string {
 
 	out := []string{}
 	for indx, i := range v.o {
-		out = append(out, fmt.Sprintf("// Field (%d) '%s'\n%s\n", indx, i.name, i.hashTreeRoot("", false)))
+		out = append(out, fmt.Sprintf("// Field (%d) '%s'\n%s\n", indx, i.name, i.hashTreeRoot("")))
 	}
 
 	tmpl := `indx := hh.Index()
