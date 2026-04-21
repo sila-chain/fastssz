@@ -34,7 +34,7 @@ func TestHashTreeRootUsesGenericPutUintForUintAlias(t *testing.T) {
 		obj:  "ValidatorIndex",
 	}
 
-	got := v.hashTreeRoot("value", false)
+	got := v.hashTreeRoot("value")
 	if !strings.Contains(got, "ssz.PutUint(hh, value)") {
 		t.Fatalf("expected generic uint put in generated hash root, got:\n%s", got)
 	}
