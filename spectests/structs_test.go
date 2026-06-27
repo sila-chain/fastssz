@@ -375,7 +375,7 @@ func checkSSZEncoding(t *testing.T, phase, fileName, structName string, base tes
 	}
 }
 
-const benchmarkTestCase = "../eth2.0-spec-tests/tests/mainnet/phase0/ssz_static/BeaconBlock/ssz_random/case_4"
+const benchmarkTestCase = "../sila-consensus-spec-tests/tests/mainnet/phase0/ssz_static/BeaconBlock/ssz_random/case_4"
 
 func BenchmarkMarshalFast(b *testing.B) {
 	obj := new(BeaconBlock)
@@ -438,7 +438,7 @@ func BenchmarkHashTreeRootFast(b *testing.B) {
 }
 
 const (
-	testsPath      = "../eth2.0-spec-tests/tests"
+	testsPath      = "../sila-consensus-spec-tests/tests"
 	serializedFile = "serialized.ssz_snappy"
 	valueFile      = "value.yaml"
 	rootsFile      = "roots.yaml"

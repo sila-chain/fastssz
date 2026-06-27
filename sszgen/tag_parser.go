@@ -80,7 +80,7 @@ func GetSSZTags(tag string) (map[string]string, error) {
 var nilInt *int
 
 // handle tag structured like 'ssz:"bitlist"'
-// this is not used in prysm but needs to be supported for fastssz tests
+// this is not used in sila but needs to be supported for fastssz tests
 func isBitList(tags map[string]string) bool {
 	for k, v := range tags {
 		if k == "ssz" {

@@ -7,7 +7,7 @@ Clone:
 $ git clone git@github.com:sila-chain/fastssz.git
 ```
 
-Download the eth2.0 spec tests
+Download the Sila consensus spec tests
 
 ```
 $ make get-spec-tests
