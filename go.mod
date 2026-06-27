@@ -1,4 +1,4 @@
-module github.com/prysmaticlabs/fastssz
+module github.com/sila-chain/fastssz
 
 go 1.19
 

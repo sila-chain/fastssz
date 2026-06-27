@@ -3,9 +3,9 @@
 package spectests
 
 import (
-	ssz "github.com/prysmaticlabs/fastssz"
-	"github.com/prysmaticlabs/fastssz/spectests/external"
-	"github.com/prysmaticlabs/fastssz/spectests/external2"
+	ssz "github.com/sila-chain/fastssz"
+	"github.com/sila-chain/fastssz/spectests/external"
+	"github.com/sila-chain/fastssz/spectests/external2"
 )
 
 // MarshalSSZ ssz marshals the AggregateAndProof object

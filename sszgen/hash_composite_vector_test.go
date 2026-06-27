@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"testing"
 
-	ssz "github.com/prysmaticlabs/fastssz"
+	ssz "github.com/sila-chain/fastssz"
 )
 
 // Test struct for composite types

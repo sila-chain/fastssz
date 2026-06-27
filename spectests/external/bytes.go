@@ -1,6 +1,6 @@
 package external
 
-import ssz "github.com/prysmaticlabs/fastssz"
+import ssz "github.com/sila-chain/fastssz"
 
 // Signature is a 96 bytes array external reference
 type Signature struct {
