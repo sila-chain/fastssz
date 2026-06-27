@@ -22,7 +22,7 @@ $ make build-spec-tests
 Generate encodings for a specific package:
 
 ```
-$ go run sszgen/*.go --path ./ethereumapis/eth/v1alpha1 [--objs BeaconBlock,Eth1Data]
+$ go run sszgen/*.go --path ./silaapis/sila/v1alpha1 [--objs BeaconBlock,Eth1Data]
 ```
 
 Optionally, you can specify the objs you want to generate. Otherwise, it will generate encodings for all structs in the package. Note that if a struct does not have 'ssz' tags when required (i.e size of arrays), the generator will fail.
@@ -30,7 +30,7 @@ Optionally, you can specify the objs you want to generate. Otherwise, it will ge
 By default, it generates a file with the prefix '_encoding.go' for each file that contains a generated struct. Optionally, you can combine all the outputs in a single file with the 'output' flag.
 
 ```
-$ go run sszgen/*.go --path ./ethereumapis/eth/v1alpha1 --output ./ethereumapis/eth/v1alpha1/encoding.go
+$ go run sszgen/*.go --path ./silaapis/sila/v1alpha1 --output ./silaapis/sila/v1alpha1/encoding.go
 ```
 
 Test the spectests:
