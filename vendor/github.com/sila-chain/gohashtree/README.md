@@ -1,6 +1,6 @@
 # Go Hashtree
 
-GoHashtree is a SHA256 library highly optimized for Merkle tree computation. It is based on [Intel's implementation](https://github.com/intel/intel-ipsec-mb) with a few modifications like hardcoding the scheduled words of the padding block. It is written in Go Assembly instead of its native assembly counterpart  [hashtree](https://github.com/prysmaticlabs/hashtree). 
+GoHashtree is a SHA256 library highly optimized for Merkle tree computation. It is based on [Intel's implementation](https://github.com/intel/intel-ipsec-mb) with a few modifications like hardcoding the scheduled words of the padding block. It is written in Go Assembly instead of its native assembly counterpart  [hashtree](https://github.com/sila-chain/hashtree). 
 
 # Using the library
 
@@ -18,7 +18,7 @@ Merkleization algorithms that loop over consecutive tree layers hashing two bloc
 ```shell
 $ cd gohashstree
 $ go test .
-ok  	github.com/prysmaticlabs/gohashtree	0.002s
+ok  	github.com/sila-chain/gohashtree	0.002s
 ```
 
 - Some benchmarks in ARM+crypto
@@ -27,7 +27,7 @@ $ cd gohashtree
 $ go test . -bench=.
 goos: darwin
 goarch: arm64
-pkg: github.com/prysmaticlabs/gohashtree
+pkg: github.com/sila-chain/gohashtree
 BenchmarkHash_1_minio-10               8472337          122.9 ns/op
 BenchmarkHash_1-10                     27011082           42.99 ns/op
 BenchmarkHash_4_minio-10               2419328          500.1 ns/op
@@ -39,7 +39,7 @@ BenchmarkHash_16-10                    1721486          689.2 ns/op
 BenchmarkHashLargeList_minio-10             38     28401697 ns/op
 BenchmarkHashList-10                       138      8619502 ns/op
 PASS
-ok      github.com/prysmaticlabs/gohashtree    16.854s
+ok      github.com/sila-chain/gohashtree    16.854s
 ```
 - Some benchmarks on a Raspberry-Pi without crypto extensions
 ```
@@ -47,7 +47,7 @@ $ cd gohashtree
 $ go test . -bench=.
 goos: linux
 goarch: arm64
-pkg: github.com/prysmaticlabs/gohashtree
+pkg: github.com/sila-chain/gohashtree
 BenchmarkHash_1_minio-4                   338904              3668 ns/op
 BenchmarkHash_1-4                        1000000              1087 ns/op
 BenchmarkHash_4_minio-4                    82258             15537 ns/op
@@ -66,7 +66,7 @@ $ cd gohashtree
 $ go test . -bench=.
 goos: linux
 goarch: amd64
-pkg: github.com/prysmaticlabs/gohashtree
+pkg: github.com/sila-chain/gohashtree
 cpu: Intel(R) Xeon(R) CPU @ 2.80GHz
 BenchmarkHash_1_minio-2                  2462506               473.1 ns/op
 BenchmarkHash_1-2                        3040208               391.3 ns/op
@@ -79,6 +79,6 @@ BenchmarkHash_16-2                        557485              1988 ns/op
 BenchmarkHashLargeList_minio-2                10         105404666 ns/op
 BenchmarkHashList-2                           45          25368532 ns/op
 PASS
-ok      github.com/prysmaticlabs/gohashtree     13.969s
+ok      github.com/sila-chain/gohashtree     13.969s
 ```
 

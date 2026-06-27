@@ -6,7 +6,7 @@ require (
 	github.com/golang/snappy v0.0.3
 	github.com/minio/sha256-simd v1.0.0
 	github.com/mitchellh/mapstructure v1.3.2
-	github.com/prysmaticlabs/gohashtree v0.0.0-20240129161530-f61e0ca8e562
+	github.com/sila-chain/gohashtree v0.0.0-20240129161530-f61e0ca8e562
 	golang.org/x/tools v0.1.8
 	gopkg.in/yaml.v2 v2.3.0
 )

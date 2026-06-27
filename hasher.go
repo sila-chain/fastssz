@@ -8,7 +8,7 @@ import (
 	"sync"
 
 	"github.com/minio/sha256-simd"
-	"github.com/prysmaticlabs/gohashtree"
+	"github.com/sila-chain/gohashtree"
 )
 
 var (

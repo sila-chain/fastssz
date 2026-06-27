@@ -4,7 +4,7 @@
 Clone:
 
 ```
-$ git clone git@github.com:prysmaticlabs/fastssz.git
+$ git clone git@github.com:sila-chain/fastssz.git
 ```
 
 Download the eth2.0 spec tests
