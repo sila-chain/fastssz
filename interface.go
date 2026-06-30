@@ -16,3 +16,6 @@ type HashRoot interface {
 	HashTreeRoot() ([32]byte, error)
 	HashTreeRootWith(hh *Hasher) error
 }
+
+// HashWalker is a compatibility alias for APIs that name the SSZ hasher cursor.
+type HashWalker = *Hasher
